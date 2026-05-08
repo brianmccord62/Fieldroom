@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FieldRoom</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--bg2:#111118;--bg3:#16161f;--bg4:#1c1c28;--sb:#0d0d14;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--accent:#3b6fff;--adim:rgba(59,111,255,0.15);--text:#f0f2f8;--text2:#8b90a4;--text3:#4a5068;--red:#ff4d4d;--amber:#f5a623;--green:#22c55e;--soon:#c9a227;--r:8px;--rs:5px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;display:flex;overflow:hidden}
+#sidebar{width:240px;min-width:240px;background:var(--sb);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto;flex-shrink:0}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-icon{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sb-logo-text{font-size:17px;font-weight:700}
+.sb-beta{font-size:10px;font-weight:600;background:var(--adim);color:var(--accent);padding:2px 7px;border-radius:4px;margin-left:4px}
+.sb-sec{padding:10px 0}
+.sb-item{display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;transition:background 0.12s,color 0.12s;margin:1px 8px;border-radius:6px}
+.sb-item:hover{background:var(--bg3);color:var(--text)}
+.sb-item.active{background:var(--adim);color:var(--accent)}
+.sb-item svg{width:16px;height:16px;flex-shrink:0;opacity:0.7}
+.sb-item.active svg{opacity:1}
+.sb-soon{font-size:10px;font-weight:700;color:var(--soon);margin-left:auto}
+.sb-div{height:1px;background:var(--border);margin:6px 16px}
+.sb-bot{margin-top:auto;padding:10px 0;border-top:1px solid var(--border)}
+.sb-btn{margin:10px 12px;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:12px;font-weight:500;padding:10px 14px;cursor:pointer;width:calc(100% - 24px);text-align:center}
+.sb-btn:hover{background:var(--bg3)}
+.sb-btn.on{color:var(--green);border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.08)}
+#main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+#topbar{height:52px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:10px;flex-shrink:0}
+#tb-title{font-size:16px;font-weight:600}
+.tb-badge{font-size:10px;font-weight:700;background:var(--adim);color:var(--accent);padding:2px 8px;border-radius:4px}
+.tb-right{margin-left:auto;display:flex;gap:8px}
+.tb-btn{width:34px;height:34px;background:transparent;border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2)}
+.tb-btn:hover{background:var(--bg3);color:var(--text)}
+#content{flex:1;overflow-y:auto;padding:28px 28px 80px}
+.screen{display:none}.screen.active{display:block}
+.cw{max-width:480px;margin:60px auto;padding:0 12px}
+.c-logo{width:60px;height:60px;background:var(--adim);border:1px solid var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 24px}
+.c-title{font-size:32px;font-weight:700;text-align:center;margin-bottom:8px}
+.c-sub{text-align:center;color:var(--text2);font-size:14px;margin-bottom:32px}
+.c-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:28px}
+.flbl{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+.iwrap{position:relative;margin-bottom:14px}
+.iwrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text3)}
+.iwrap input{padding-left:38px}
+input[type=text],textarea,select{width:100%;background:var(--bg4);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;padding:10px 13px;outline:none;transition:border-color 0.15s}
+input[type=text]:focus,textarea:focus{border-color:var(--accent)}
+.btn-p{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:11px 20px;cursor:pointer;transition:background 0.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-p:hover{background:#5580ff}
+.btn-p:disabled{opacity:0.4;cursor:not-allowed}
+.btn-g{background:transparent;border:1px solid var(--border);border-radius:var(--rs);color:var(--text2);font-size:13px;padding:8px 14px;cursor:pointer}
+.btn-g:hover{border-color:var(--border2);color:var(--text)}
+.btn-b{background:var(--adim);border:1px solid rgba(59,111,255,0.3);border-radius:var(--rs);color:var(--accent);font-size:13px;font-weight:500;padding:7px 14px;cursor:pointer;white-space:nowrap}
+.btn-b:hover{background:rgba(59,111,255,0.22)}
+.err{margin-top:10px;font-size:13px;color:var(--red)}
+.note{font-size:12px;color:var(--text3);text-align:center;margin-top:14px}
+.lw{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px}
+.spin{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lbl{font-size:13px;color:var(--text2);font-family:'IBM Plex Mono',monospace}
+.lcard{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:8px;cursor:pointer;transition:border-color 0.15s;display:flex;align-items:center;justify-content:space-between}
+.lcard:hover{border-color:var(--accent)}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:24px}
+.sc{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.sl{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+.sn{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:500}
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;margin-bottom:14px}
+.ct{font-size:15px;font-weight:600;margin-bottom:4px}
+.cs{font-size:13px;color:var(--text2);margin-bottom:16px}
+.ph{margin-bottom:24px}
+.pt{font-size:22px;font-weight:700}
+.ps{font-size:13px;color:var(--text2);margin-top:4px}
+.tl{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px}
+.pos-QB{background:rgba(255,181,71,0.15);color:#ffb547;display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px}
+.pos-RB{background:rgba(34,197,94,0.15);color:#22c55e;display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px}
+.pos-WR{background:rgba(59,111,255,0.15);color:#3b6fff;display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px}
+.pos-TE{background:rgba(255,126,179,0.15);color:#ff7eb3;display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px}
+.pos-K{background:rgba(155,127,255,0.15);color:#9b7fff;display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px}
+.pos-DEF{background:rgba(139,144,164,0.15);color:#8b90a4;display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px}
+.pos-x{background:rgba(139,144,164,0.15);color:#8b90a4;display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px}
+.pr{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}
+.pr:last-child{border-bottom:none}
+.pav{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;flex-shrink:0;background:var(--bg4);color:var(--text2)}
+.pn{font-weight:500;font-size:14px}
+.pm{font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace}
+.psh{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 6px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.ai{background:var(--bg4);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--rs);padding:16px 18px;margin-top:14px}
+.ail{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.aid{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 1.5s ease-in-out infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.aic{font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap}
+.aic.loading{color:var(--text2);font-style:italic}
+.wr{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.wp{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);width:32px}
+.wt{flex:1;height:4px;background:var(--bg4);border-radius:2px}
+.wf{height:100%;border-radius:2px}
+.ws{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);width:30px;text-align:right}
+.tr{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:10px}
+.tr:last-child{border-bottom:none}
+.tn{font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm{font-size:12px;color:var(--text2);margin-top:2px;font-family:'IBM Plex Mono',monospace}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--bg4);border:1px solid var(--border);border-radius:99px;padding:5px 12px;font-size:12px;margin:3px}
+.tic{background:var(--bg4);border:1px solid var(--border);border-radius:var(--rs);padding:13px 15px;margin-bottom:8px}
+.ti2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+textarea{resize:none;background:var(--bg4);border:1px solid var(--border);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:10px 12px;border-radius:var(--rs);outline:none;width:100%;line-height:1.6}
+textarea:focus{border-color:var(--accent)}
+.sw{display:flex;flex-direction:column;align-items:center;justify-content:center;height:55vh;gap:12px;text-align:center}
+.sb2{font-size:12px;font-weight:700;background:rgba(201,162,39,0.15);color:var(--soon);padding:4px 12px;border-radius:99px;letter-spacing:0.08em;margin-bottom:4px}
+.st{font-size:24px;font-weight:700}
+.sd{font-size:14px;color:var(--text2);max-width:340px;line-height:1.7}
+.rtab{background:var(--bg4);border:1px solid var(--border);border-radius:var(--rs);color:var(--text2);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;padding:6px 14px;cursor:pointer;transition:all 0.12s}
+.rtab:hover{color:var(--text);border-color:var(--border2)}
+.rtab.active{background:var(--adim);border-color:rgba(59,111,255,0.4);color:var(--accent)}
+.gc{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:10px}
+.gt{font-size:12px;color:var(--text2);margin-bottom:8px;font-family:'IBM Plex Mono',monospace}
+.og{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.oc{background:var(--bg4);border:1px solid var(--border);border-radius:var(--rs);padding:8px 10px}
+.ol{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
+.ov{font-size:13px;font-weight:600;font-family:'IBM Plex Mono',monospace}
+.ob{font-size:10px;color:var(--text3);margin-top:2px}
+.pprow{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.pprow:last-child{border-bottom:none}
+.ppr{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;text-align:right}
+.ppo{font-size:11px;color:var(--text2);text-align:right;margin-top:2px}
+.grpill{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:3px 9px;border-radius:4px}
+.grA{background:rgba(34,197,94,0.15);color:#22c55e}
+.grB{background:rgba(59,111,255,0.15);color:#3b6fff}
+.grC{background:rgba(245,166,35,0.15);color:#f5a623}
+.grD{background:rgba(255,77,77,0.15);color:#ff4d4d}
+.pbrow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.pbrow:last-child{border-bottom:none}
+.pbr{font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:500;width:28px;color:var(--text3)}
+.pbr.t3{color:var(--accent)}
+.pbw{flex:1;height:6px;background:var(--bg4);border-radius:3px}
+.pbf{height:100%;border-radius:3px}
+.offnotice{background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:24px;text-align:center;margin-bottom:14px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+@media(max-width:560px){.ti2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">&#127944;</div>
+    <span class="sb-logo-text">FieldRoom</span>
+    <span class="sb-beta">BETA</span>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-item active" id="nav-home" onclick="navTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</div>
+    <div class="sb-item" id="nav-rankings" onclick="navTo('rankings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Player Rankings</div>
+    <div class="sb-item" id="nav-matchup" onclick="navTo('matchup')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>Matchup</div>
+    <div class="sb-item" id="nav-team" onclick="navTo('team')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Team</div>
+    <div class="sb-item" id="nav-waivers" onclick="navTo('waivers')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Waivers</div>
+    <div class="sb-item" id="nav-trades" onclick="navTo('trades')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Trade Ideas</div>
+    <div class="sb-item" id="nav-analyzer" onclick="navTo('analyzer')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Trade Analyzer</div>
+    <div class="sb-item" id="nav-betting" onclick="navTo('betting')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Betting Lines</div>
+    <div class="sb-item" id="nav-leagueanalyzer" onclick="navTo('leagueanalyzer')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>League Analyzer</div>
+  </div>
+  <div class="sb-div"></div>
+  <div class="sb-sec">
+    <div class="sb-item" id="nav-draftrankings" onclick="navTo('draftrankings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Draft Rankings<span class="sb-soon">SOON</span></div>
+    <div class="sb-item" id="nav-playoff" onclick="navTo('playoff')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>Playoff Predictor<span class="sb-soon">SOON</span></div>
+    <div class="sb-item" id="nav-pricing" onclick="navTo('pricing')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Pricing</div>
+    <div class="sb-item" id="nav-settings" onclick="navTo('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings</div>
+  </div>
+  <div class="sb-bot">
+    <button class="sb-btn" id="sb-btn" onclick="handleSbBtn()">Sign in to connect leagues</button>
+  </div>
+</nav>
+
+<div id="main">
+  <div id="topbar">
+    <span id="tb-title">FieldRoom</span>
+    <span class="tb-badge">BETA</span>
+    <div class="tb-right">
+      <div class="tb-btn" onclick="handleSbBtn()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    </div>
+  </div>
+  <div id="content">
+
+    <!-- HOME -->
+    <div class="screen active" id="page-home">
+      <div id="home-login">
+        <div class="cw">
+          <div class="c-logo">&#127944;</div>
+          <h1 class="c-title">Welcome back</h1>
+          <p class="c-sub">Enter your Sleeper username to connect your leagues</p>
+          <div class="c-card">
+            <div class="flbl">Sleeper username</div>
+            <div class="iwrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <input type="text" id="u-input" placeholder="e.g. brianmccord62" autocomplete="off" onkeydown="if(event.key==='Enter')doConnect()">
+            </div>
+            <button class="btn-p" id="conn-btn" onclick="doConnect()">Sign in &#8594;</button>
+            <div id="conn-err" class="err" style="display:none"></div>
+          </div>
+          <p class="note">Lowercase username from Sleeper app &#8901; read-only &#8901; no password needed</p>
+        </div>
+      </div>
+      <div id="home-dash" style="display:none">
+        <div class="ph">
+          <div class="tl" id="d-league"></div>
+          <div class="pt" id="d-team"></div>
+          <div style="font-size:13px;color:var(--text2);margin-top:4px" id="d-rec"></div>
+        </div>
+        <div class="sg" id="d-stats"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="card" style="cursor:pointer" onclick="navTo('team')"><div class="ct">My Roster</div><div class="cs">View full player roster</div><div id="d-pos" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div></div>
+          <div class="card" style="cursor:pointer" onclick="navTo('trades')"><div class="ct">Trade Ideas</div><div class="cs">AI-powered trade targets</div><div id="d-weak" style="font-size:13px;color:var(--text2);margin-top:4px"></div></div>
+          <div class="card" style="cursor:pointer" onclick="navTo('waivers')"><div class="ct">Waiver Wire</div><div class="cs">Top pickups this week</div><div id="d-trend" style="margin-top:8px"></div></div>
+          <div class="card" style="cursor:pointer" onclick="navTo('analyzer')"><div class="ct">Trade Analyzer</div><div class="cs">Evaluate any trade offer</div><div style="margin-top:8px;font-size:13px;color:var(--text2)">Enter players for an instant AI verdict</div></div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn-b" onclick="refreshRoster()" id="refresh-btn" style="margin-right:8px">&#8635; Refresh roster</button>
+          <button class="btn-g" onclick="doSwitch()" id="sw-btn" style="display:none">Switch league</button>
+          <button class="btn-g" onclick="doReset()">Disconnect</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOADING -->
+    <div class="screen" id="page-loading">
+      <div class="lw"><div class="spin"></div><div class="lbl" id="load-msg">Loading...</div></div>
+    </div>
+
+    <!-- LEAGUES -->
+    <div class="screen" id="page-leagues">
+      <div class="ph"><div class="pt">Choose a league</div></div>
+      <div id="league-list" style="max-width:520px"></div>
+      <button class="btn-g" onclick="showPage('home')" style="margin-top:12px">&#8592; Back</button>
+    </div>
+
+    <!-- TEAM -->
+    <div class="screen" id="page-team">
+      <div class="ph"><div class="pt">Team</div><div class="ps">Your full roster</div></div>
+      <div class="card" id="roster-card"><div style="color:var(--text2)">Connect your league to see your roster</div></div>
+    </div>
+
+    <!-- WAIVERS -->
+    <div class="screen" id="page-waivers">
+      <div class="ph"><div class="pt">Waivers</div><div class="ps">AI waiver wire recommendations</div></div>
+      <div class="card">
+        <div class="ct">AI recommendations</div>
+        <div class="cs">Personalized pickups based on your roster gaps</div>
+        <div id="waiv-ai" class="ai"><div class="ail"><div class="aid"></div>Claude AI</div><div class="aic loading">Click below to analyze your roster</div></div>
+        <button class="btn-b" onclick="doWaiverAI()" style="margin-top:14px">Get recommendations &#8594;</button>
+      </div>
+      <div class="card" id="trend-card">
+        <div class="ct">Trending on Sleeper</div>
+        <div class="cs">Most added players in the last 48 hours</div>
+        <div id="trend-list" style="margin-top:8px"></div>
+      </div>
+      <div class="card">
+        <div class="ct">Ask about a player</div>
+        <div class="cs">Start/sit, injury updates, trade value</div>
+        <div style="display:flex;gap:10px">
+          <input type="text" id="pq" placeholder="Should I pick up Puka Nacua?" onkeydown="if(event.key==='Enter')doAskPlayer()" style="flex:1">
+          <button class="btn-b" onclick="doAskPlayer()">Ask &#8594;</button>
+        </div>
+        <div id="pq-resp" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- TRADES -->
+    <div class="screen" id="page-trades">
+      <div class="ph"><div class="pt">Trade Ideas</div><div class="ps">AI trade targets based on your weaknesses vs all league rosters</div></div>
+      <div class="card">
+        <div class="ct">Roster weakness analysis</div>
+        <div class="cs">Your position depth vs league average</div>
+        <div id="weak-bars"></div>
+      </div>
+      <div class="card">
+        <div class="ct">AI trade strategy</div>
+        <div class="cs">Full league roster scan for trade opportunities</div>
+        <div id="trade-ai" class="ai"><div class="ail"><div class="aid"></div>Claude AI</div><div class="aic loading">Click below to scan all rosters</div></div>
+        <button class="btn-b" onclick="doTradeAI()" style="margin-top:14px">Analyze trade market &#8594;</button>
+      </div>
+      <div class="card">
+        <div class="ct">Target a specific team</div>
+        <div class="cs">Generate trade proposals with any team in your league</div>
+        <div id="team-list"></div>
+      </div>
+      <div id="targeted-container"></div>
+    </div>
+
+    <!-- ANALYZER -->
+    <div class="screen" id="page-analyzer">
+      <div class="ph"><div class="pt">Trade Analyzer</div><div class="ps">Get an instant AI verdict on any proposed trade</div></div>
+      <div class="card">
+        <div class="ti2">
+          <div><div class="flbl">I give up</div><textarea id="t-give" placeholder="e.g. Davante Adams, 2025 2nd round pick" rows="3"></textarea></div>
+          <div><div class="flbl">I receive</div><textarea id="t-recv" placeholder="e.g. Tyreek Hill" rows="3"></textarea></div>
+        </div>
+        <button class="btn-p" onclick="doAnalyzeTrade()" style="max-width:220px">Analyze trade &#8594;</button>
+        <div id="anal-resp"></div>
+      </div>
+      <div class="card">
+        <div class="ct">Recent league trades</div>
+        <div id="recent-trades"><div style="font-size:13px;color:var(--text3)">Connect your league to see trades</div></div>
+      </div>
+    </div>
+
+    <!-- LEAGUE ANALYZER -->
+    <div class="screen" id="page-leagueanalyzer">
+      <div class="ph"><div class="pt">League Analyzer</div><div class="ps">Power rankings, playoff odds, and roster grades for your entire league</div></div>
+      <div class="card">
+        <div class="ct">Power rankings</div>
+        <div class="cs">All teams ranked by roster strength, record, and trajectory</div>
+        <div id="la-power" class="ai"><div class="ail"><div class="aid"></div>Claude AI</div><div class="aic loading">Click below to generate power rankings</div></div>
+        <button class="btn-b" onclick="doLeagueAnalyzer()" style="margin-top:14px">Generate analysis &#8594;</button>
+      </div>
+      <div class="card">
+        <div class="ct">Playoff probability</div>
+        <div class="cs">Each team estimated odds of making the playoffs</div>
+        <div id="la-playoff" style="margin-top:8px"></div>
+      </div>
+      <div class="card">
+        <div class="ct">Roster grades</div>
+        <div class="cs">Position-by-position talent for every team</div>
+        <div id="la-grades"></div>
+      </div>
+      <div class="card">
+        <div class="ct">Trade value map</div>
+        <div class="cs">Who is buying vs selling</div>
+        <div id="la-trademap" class="ai"><div class="ail"><div class="aid"></div>Claude AI</div><div class="aic loading">Run analysis above to populate</div></div>
+      </div>
+    </div>
+
+    <!-- PLAYER RANKINGS -->
+    <div class="screen" id="page-rankings">
+      <div class="ph"><div class="pt">Player Rankings</div><div class="ps">AI-generated rankings for your scoring format</div></div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap" id="rk-pos-tabs">
+            <button class="rtab active" onclick="setRkPos('all')">All</button>
+            <button class="rtab" onclick="setRkPos('qb')">QB</button>
+            <button class="rtab" onclick="setRkPos('rb')">RB</button>
+            <button class="rtab" onclick="setRkPos('wr')">WR</button>
+            <button class="rtab" onclick="setRkPos('te')">TE</button>
+            <button class="rtab" onclick="setRkPos('flex')">FLEX</button>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="rtab active" id="rk-w" onclick="setRkView('weekly')">Weekly</button>
+            <button class="rtab" id="rk-r" onclick="setRkView('ros')">Rest of Season</button>
+          </div>
+        </div>
+        <div id="rk-content" class="ai"><div class="ail"><div class="aid"></div>Claude AI</div><div class="aic loading">Click below to generate rankings</div></div>
+        <button class="btn-b" onclick="doRankings()" style="margin-top:14px">Generate rankings &#8594;</button>
+      </div>
+      <div class="card">
+        <div class="ct">Injury &amp; news alerts</div>
+        <div class="cs">Notable player news affecting rankings</div>
+        <div id="rk-news" class="ai"><div class="ail"><div class="aid"></div>Claude AI</div><div class="aic loading">Run rankings above to populate</div></div>
+      </div>
+    </div>
+
+    <!-- BETTING -->
+    <div class="screen" id="page-betting">
+      <div class="ph"><div class="pt">Betting Lines</div><div class="ps">NFL game lines and player props from major sportsbooks</div></div>
+      <div style="display:flex;gap:6px;margin-bottom:20px" id="bet-tabs">
+        <button class="rtab active" onclick="setBetView('games')">Game Lines</button>
+        <button class="rtab" onclick="setBetView('props')">Player Props</button>
+        <button class="rtab" onclick="setBetView('ai')">AI Picks</button>
+      </div>
+      <div id="bet-games"><div id="bet-gc"><div class="lw" style="height:200px"><div class="spin"></div><div class="lbl">Fetching lines...</div></div></div></div>
+      <div id="bet-props" style="display:none">
+        <div class="card"><div class="ct">Select a game</div><div class="cs">Choose a game to view player props</div><div id="bet-gsel"></div></div>
+        <div id="bet-pc"></div>
+      </div>
+      <div id="bet-ai" style="display:none">
+        <div class="card">
+          <div class="ct">AI betting analysis</div>
+          <div class="cs">Value bets, injury-adjusted lines, and props to target</div>
+          <div id="bet-aic" class="ai"><div class="ail"><div class="aid"></div>Claude AI</div><div class="aic loading">Click below to get AI analysis</div></div>
+          <button class="btn-b" onclick="doBetAI()" style="margin-top:14px">Get AI analysis &#8594;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOON PAGES -->
+    <div class="screen" id="page-matchup"><div class="sw"><div class="sb2">COMING SOON</div><div class="st">Matchup Analysis</div><div class="sd">Head-to-head projections, optimal lineup, and win probability for your matchup this week.</div></div></div>
+    <div class="screen" id="page-draftrankings"><div class="sw"><div class="sb2">COMING SOON</div><div class="st">Draft Rankings</div><div class="sd">Custom ADP-adjusted draft boards and live draft assistant with round-by-round guidance.</div></div></div>
+    <div class="screen" id="page-playoff"><div class="sw"><div class="sb2">COMING SOON</div><div class="st">Playoff Predictor</div><div class="sd">Monte Carlo simulations projecting your playoff odds and path to the championship.</div></div></div>
+    <div class="screen" id="page-pricing"><div class="sw"><div class="sb2">FREE BETA</div><div class="st">Free During Beta</div><div class="sd">FieldRoom is completely free while in beta. All AI features included at no cost.</div></div></div>
+    <div class="screen" id="page-settings"><div class="sw"><div class="sb2">COMING SOON</div><div class="st">Settings</div><div class="sd">Notification preferences, display options, and AI behavior customization.</div></div></div>
+
+  </div>
+</div>
+
+<script>
+var SEASON = String(new Date().getFullYear());
+var S = {
+  userId: null, username: null,
+  leagues: [], league: null,
+  rosters: [], users: [],
+  myRoster: null, myUser: null,
+  players: {}, transactions: [], trending: [],
+  byPos: {}, allPlayers: [],
+  teamName: '', record: ''
+};
+var teamLookup = {};
+var gameLookup = {};
+var rkPos = 'all', rkView = 'weekly', rkLoaded = false;
+var betView = 'games', betGames = [], betLoaded = false;
+var laLoaded = false;
+
+function seasonCandidates() {
+  var current = new Date().getFullYear();
+  var years = [current, current - 1, current + 1, current - 2];
+  var seen = {};
+  return years.filter(function(y) {
+    var s = String(y);
+    if (seen[s]) return false;
+    seen[s] = true;
+    return true;
+  });
+}
+
+var TITLES = {
+  home:'FieldRoom', team:'Team', waivers:'Waivers', trades:'Trade Ideas',
+  analyzer:'Trade Analyzer', matchup:'Matchup', rankings:'Player Rankings',
+  betting:'Betting Lines', leagueanalyzer:'League Analyzer',
+  draftrankings:'Draft Rankings', playoff:'Playoff Predictor',
+  pricing:'Pricing', settings:'Settings'
+};
+
+function showPage(name) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  var pg = document.getElementById('page-' + name);
+  if (pg) pg.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(function(i) { i.classList.remove('active'); });
+  var nav = document.getElementById('nav-' + name);
+  if (nav) nav.classList.add('active');
+  var tb = document.getElementById('tb-title');
+  if (tb) tb.textContent = TITLES[name] || 'FieldRoom';
+}
+
+function navTo(name) {
+  showPage(name);
+  if (name === 'leagueanalyzer' && !laLoaded && S.league) doLeagueAnalyzer();
+  if (name === 'betting' && !betLoaded) loadBettingLines();
+}
+
+function handleSbBtn() {
+  if (S.userId) { doReset(); } else { navTo('home'); var inp = document.getElementById('u-input'); if (inp) { inp.focus(); } }
+}
+
+function setAI(id, text, loading) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = '<div class="ail"><div class="aid"></div>Claude AI</div><div class="aic' + (loading ? ' loading' : '') + '">' + (loading ? text : escHtml(text)) + '</div>';
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function posClass(pos) {
+  var m = { QB:'pos-QB', RB:'pos-RB', WR:'pos-WR', TE:'pos-TE', K:'pos-K', DEF:'pos-DEF' };
+  return m[pos] || 'pos-x';
+}
+
+function posColor(pos) {
+  var m = { QB:'#ffb547', RB:'#22c55e', WR:'#3b6fff', TE:'#ff7eb3', K:'#9b7fff', DEF:'#8b90a4' };
+  return m[pos] || '#8b90a4';
+}
+
+function getPlayer(id) {
+  return S.players[id] || { full_name: String(id), position: '?', team: 'FA' };
+}
+
+function initials(name) {
+  var parts = String(name || '?').split(' ').filter(function(w) { return w.length > 0; });
+  return parts.slice(0, 2).map(function(w) { return w[0].toUpperCase(); }).join('');
+}
+
+function scoringType() {
+  if (!S.league || !S.league.settings) return 'Standard';
+  var t = S.league.settings.type;
+  return t === 1 ? 'PPR' : t === 2 ? 'Half-PPR' : 'Standard';
+}
+
+function formatOdds(n) {
+  if (n === null || n === undefined) return '--';
+  return n > 0 ? '+' + n : String(n);
+}
+
+function rosterCtx() {
+  var parts = ['QB','RB','WR','TE','K','DEF'].map(function(pos) {
+    var ps = S.byPos[pos] || [];
+    if (!ps.length) return null;
+    return pos + ': ' + ps.map(function(p) { return p.full_name || p.id; }).join(', ');
+  }).filter(function(x) { return x !== null; });
+  var leagueName = S.league ? S.league.name : 'Unknown';
+  var teams = S.league ? S.league.total_rosters : 0;
+  return 'My team: ' + S.teamName + '\nRecord: ' + S.record + '\nLeague: ' + leagueName + ' (' + teams + ' teams, ' + scoringType() + ' scoring, NFL ' + SEASON + ')\n\n' + parts.join('\n');
+}
+
+// ---- API HELPERS ----
+
+async function sleeperGet(path) {
+  var cleanPath = path.replace(/^\//, '');
+  // Add timestamp to bust any edge/browser cache
+  var url = '/api/sleeper?path=' + encodeURIComponent(cleanPath) + '&_t=' + Date.now();
+  var r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) {
+    var body = null;
+    try { body = await r.json(); } catch(e) {}
+    throw new Error((body && body.error) ? body.error : 'Sleeper error ' + r.status);
+  }
+  return r.json();
+}
+
+async function sleeperDirect(path) {
+  var r = await fetch('https://api.sleeper.app/v1' + path);
+  if (!r.ok) throw new Error('Sleeper error ' + r.status);
+  return r.json();
+}
+
+async function claudeAsk(userPrompt, sys) {
+  var r = await fetch('/api/claude', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: userPrompt, system: sys || 'You are an expert NFL fantasy football analyst.' })
+  });
+  var d = await r.json();
+  if (d.error) throw new Error(d.error);
+  return d.text || '';
+}
+
+// ---- CONNECT FLOW ----
+
+async function doConnect() {
+  var u = String(document.getElementById('u-input').value || '').trim().toLowerCase();
+  if (!u) return;
+  document.getElementById('conn-btn').disabled = true;
+  document.getElementById('conn-err').style.display = 'none';
+  showPage('loading');
+  document.getElementById('load-msg').textContent = 'Looking up @' + u + '...';
+
+  try {
+    var user = await sleeperGet('user/' + u);
+    if (!user || !user.user_id) throw new Error('Username not found. Check the Sleeper app under your profile for your exact username.');
+    S.userId = String(user.user_id);
+    S.username = user.username || u;
+
+    document.getElementById('load-msg').textContent = 'Fetching leagues...';
+    var leagues = [];
+    var seasons = seasonCandidates();
+    for (var si = 0; si < seasons.length; si++) {
+      var yr = seasons[si];
+      var found = [];
+      try {
+        found = await sleeperGet('user/' + S.userId + '/leagues/nfl/' + yr);
+      } catch(e) {
+        found = [];
+      }
+      if (found && found.length) {
+        SEASON = String(yr);
+        leagues = found;
+        break;
+      }
+    }
+    S.leagues = leagues || [];
+    if (!S.leagues.length) throw new Error('No NFL leagues found for ' + seasons.join(', ') + '. Make sure you have a Sleeper league.');
+
+    if (S.leagues.length === 1) {
+      await loadLeague(S.leagues[0]);
+    } else {
+      renderLeagueSelector();
+    }
+  } catch(e) {
+    showPage('home');
+    document.getElementById('home-login').style.display = '';
+    var el = document.getElementById('conn-err');
+    el.textContent = e.message || 'Something went wrong. Try again.';
+    el.style.display = 'block';
+    document.getElementById('conn-btn').disabled = false;
+  }
+}
+
+function renderLeagueSelector() {
+  var list = document.getElementById('league-list');
+  list.innerHTML = '';
+  S.leagues.forEach(function(l) {
+    var d = document.createElement('div');
+    d.className = 'lcard';
+    var sc = (l.settings && l.settings.type === 1) ? 'PPR' : (l.settings && l.settings.type === 2) ? 'Half-PPR' : 'Standard';
+    d.innerHTML = '<div><div style="font-size:15px;font-weight:600">' + escHtml(l.name) + '</div><div style="font-size:12px;color:var(--text2);margin-top:3px">' + (l.total_rosters || 0) + ' teams &middot; ' + sc + ' &middot; ' + (l.season || SEASON) + '</div></div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
+    d.onclick = (function(league) { return function() { loadLeague(league); }; })(l);
+    list.appendChild(d);
+  });
+  showPage('leagues');
+}
+
+function doSwitch() { if (S.leagues.length > 1) renderLeagueSelector(); }
+
+async function loadLeague(league) {
+  S.league = league;
+  showPage('loading');
+  document.getElementById('load-msg').textContent = 'Loading league data...';
+
+  try {
+    // Load rosters, users, transactions, trending all at once
+    var res = await Promise.all([
+      sleeperGet('league/' + league.league_id + '/rosters'),
+      sleeperGet('league/' + league.league_id + '/users'),
+      sleeperGet('league/' + league.league_id + '/transactions/1').catch(function() { return []; }),
+      sleeperDirect('/players/nfl/trending/add?lookback_hours=48&limit=25').catch(function() { return []; })
+    ]);
+    S.rosters = res[0] || [];
+    S.users = res[1] || [];
+    S.transactions = res[2] || [];
+    S.trending = res[3] || [];
+
+    // Match my roster — use String() comparison to handle type mismatches
+    S.myRoster = null;
+    for (var i = 0; i < S.rosters.length; i++) {
+      if (String(S.rosters[i].owner_id) === String(S.userId)) {
+        S.myRoster = S.rosters[i];
+        break;
+      }
+    }
+    if (!S.myRoster && S.rosters.length > 0) S.myRoster = S.rosters[0];
+
+    S.myUser = null;
+    for (var j = 0; j < S.users.length; j++) {
+      if (String(S.users[j].user_id) === String(S.userId)) {
+        S.myUser = S.users[j];
+        break;
+      }
+    }
+
+    // Render immediately, then refresh names once the large player database loads.
+    buildAll();
+    renderApp();
+    showPage('home');
+    loadPlayersInBackground();
+
+  } catch(e) {
+    showPage('home');
+    document.getElementById('home-login').style.display = '';
+    var el = document.getElementById('conn-err');
+    el.textContent = 'Failed to load league: ' + e.message;
+    el.style.display = 'block';
+    document.getElementById('conn-btn').disabled = false;
+  }
+}
+
+function buildAll() {
+  S.byPos = {};
+  S.allPlayers = [];
+  var playerIds = S.myRoster ? (S.myRoster.players || []) : [];
+  for (var i = 0; i < playerIds.length; i++) {
+    var id = playerIds[i];
+    var p = getPlayer(id);
+    var pos = p.position || '?';
+    if (!S.byPos[pos]) S.byPos[pos] = [];
+    var entry = { id: id, full_name: p.full_name, position: p.position, team: p.team, age: p.age };
+    S.byPos[pos].push(entry);
+    S.allPlayers.push(entry);
+  }
+}
+
+async function loadPlayersInBackground() {
+  if (Object.keys(S.players || {}).length) return;
+  try {
+    S.players = await sleeperDirect('/players/nfl');
+    buildAll();
+    renderApp();
+  } catch(e) {
+    console.warn('Player DB failed:', e.message);
+  }
+}
+
+async function refreshRoster() {
+  if (!S.league || !S.league.league_id) return;
+  var btn = document.getElementById('refresh-btn');
+  if (btn) { btn.textContent = 'Refreshing...'; btn.disabled = true; }
+
+  try {
+    var res = await Promise.all([
+      sleeperGet('league/' + S.league.league_id + '/rosters'),
+      sleeperGet('league/' + S.league.league_id + '/users').catch(function() { return S.users || []; }),
+      sleeperGet('league/' + S.league.league_id + '/transactions/1').catch(function() { return []; }),
+      sleeperDirect('/players/nfl/trending/add?lookback_hours=48&limit=25').catch(function() { return S.trending || []; })
+    ]);
+
+    S.rosters = res[0] || [];
+    S.users = res[1] || [];
+    S.transactions = res[2] || [];
+    S.trending = res[3] || [];
+
+    S.myRoster = null;
+    for (var i = 0; i < S.rosters.length; i++) {
+      if (String(S.rosters[i].owner_id) === String(S.userId)) {
+        S.myRoster = S.rosters[i];
+        break;
+      }
+    }
+    if (!S.myRoster && S.rosters.length > 0) S.myRoster = S.rosters[0];
+
+    S.myUser = null;
+    for (var j = 0; j < S.users.length; j++) {
+      if (String(S.users[j].user_id) === String(S.userId)) {
+        S.myUser = S.users[j];
+        break;
+      }
+    }
+
+    if (!Object.keys(S.players || {}).length) {
+      try { S.players = await sleeperDirect('/players/nfl'); } catch(e) { console.warn('Player DB refresh failed:', e.message); }
+    }
+
+    buildAll();
+    renderApp();
+
+    if (btn) {
+      btn.textContent = 'Roster updated!';
+      setTimeout(function() { btn.textContent = '\u21bb Refresh roster'; btn.disabled = false; }, 2000);
+    }
+  } catch(e) {
+    console.error('Refresh error:', e.message);
+    if (btn) { btn.textContent = 'Refresh failed'; btn.disabled = false; }
+  }
+}
+
+function doReset() {
+  S = { userId:null, username:null, leagues:[], league:null, rosters:[], users:[], myRoster:null, myUser:null, players:{}, transactions:[], trending:[], byPos:{}, allPlayers:[], teamName:'', record:'' };
+  teamLookup = {}; gameLookup = {};
+  rkLoaded = false; laLoaded = false; betLoaded = false; betGames = [];
+  document.getElementById('home-login').style.display = '';
+  document.getElementById('home-dash').style.display = 'none';
+  document.getElementById('sb-btn').textContent = 'Sign in to connect leagues';
+  document.getElementById('sb-btn').className = 'sb-btn';
+  document.getElementById('conn-btn').disabled = false;
+  document.getElementById('conn-err').style.display = 'none';
+  document.getElementById('u-input').value = '';
+  showPage('home');
+}
+
+// ---- RENDER APP ----
+
+function renderApp() {
+  var wins = (S.myRoster && S.myRoster.settings) ? (S.myRoster.settings.wins || 0) : 0;
+  var losses = (S.myRoster && S.myRoster.settings) ? (S.myRoster.settings.losses || 0) : 0;
+
+  if (S.myUser && S.myUser.metadata && S.myUser.metadata.team_name) {
+    S.teamName = S.myUser.metadata.team_name;
+  } else if (S.myUser && S.myUser.display_name) {
+    S.teamName = S.myUser.display_name;
+  } else {
+    S.teamName = S.username || 'My Team';
+  }
+  S.record = wins + '-' + losses;
+
+  var sbBtn = document.getElementById('sb-btn');
+  sbBtn.textContent = 'Connected: @' + S.username;
+  sbBtn.className = 'sb-btn on';
+
+  document.getElementById('home-login').style.display = 'none';
+  document.getElementById('home-dash').style.display = '';
+
+  var sw = document.getElementById('sw-btn');
+  if (sw) sw.style.display = S.leagues.length > 1 ? '' : 'none';
+
+  var leagueName = S.league ? S.league.name : '';
+  var teamCount = S.league ? S.league.total_rosters : 0;
+  document.getElementById('d-league').textContent = leagueName;
+  document.getElementById('d-team').textContent = S.teamName;
+  document.getElementById('d-rec').textContent = wins + '-' + losses + ' \u00b7 ' + scoringType() + ' \u00b7 ' + teamCount + ' teams';
+
+  // Stat grid
+  var pos = ['QB','RB','WR','TE','K','DEF'];
+  var statsHtml = '';
+  for (var i = 0; i < pos.length; i++) {
+    var cnt = (S.byPos[pos[i]] || []).length;
+    statsHtml += '<div class="sc"><div class="sl">' + pos[i] + '</div><div class="sn" style="color:' + posColor(pos[i]) + '">' + cnt + '</div></div>';
+  }
+  statsHtml += '<div class="sc"><div class="sl">Record</div><div class="sn" style="color:var(--accent)">' + wins + '-' + losses + '</div></div>';
+  document.getElementById('d-stats').innerHTML = statsHtml;
+
+  // Position pills
+  var pillHtml = '';
+  for (var p = 0; p < pos.length; p++) {
+    var c = (S.byPos[pos[p]] || []).length;
+    if (c > 0) pillHtml += '<span class="' + posClass(pos[p]) + '">' + c + ' ' + pos[p] + '</span>';
+  }
+  document.getElementById('d-pos').innerHTML = pillHtml;
+
+  // Weakness preview
+  var weakPos = ['QB','RB','WR','TE'].filter(function(px) { return (S.byPos[px] || []).length < (px === 'QB' ? 2 : 4); });
+  document.getElementById('d-weak').textContent = weakPos.length ? 'Needs: ' + weakPos.join(', ') : 'Roster looks balanced';
+
+  // Trending preview
+  var trendNames = S.trending.slice(0, 4).map(function(t) {
+    var p = S.players[t.player_id];
+    return p ? p.full_name : null;
+  }).filter(function(n) { return n !== null; });
+  var trendHtml = '';
+  for (var t = 0; t < trendNames.length; t++) {
+    trendHtml += '<div class="pill" style="margin:2px;font-size:11px"><span style="color:#22c55e;font-size:10px">&#8593;</span>' + escHtml(trendNames[t]) + '</div>';
+  }
+  document.getElementById('d-trend').innerHTML = trendHtml;
+
+  renderRoster();
+  renderWeakness();
+  renderTrending();
+  renderTeamList();
+  renderRecentTrades();
+}
+
+// ---- ROSTER ----
+
+function renderRoster() {
+  var positions = ['QB','RB','WR','TE','K','DEF'];
+  var html = '<div style="font-size:15px;font-weight:600;margin-bottom:4px">Current roster</div>';
+  html += '<div style="font-size:13px;color:var(--text2);margin-bottom:16px">' + S.allPlayers.length + ' players</div>';
+
+  for (var i = 0; i < positions.length; i++) {
+    var pos = positions[i];
+    var ps = S.byPos[pos] || [];
+    if (!ps.length) continue;
+    html += '<div class="psh">' + pos + ' &mdash; ' + ps.length + '</div>';
+    for (var j = 0; j < ps.length; j++) {
+      var p = ps[j];
+      var name = p.full_name || String(p.id);
+      var team = p.team || 'FA';
+      var age = p.age ? ' &middot; ' + p.age + ' yrs' : '';
+      html += '<div class="pr">';
+      html += '<div class="pav" style="color:' + posColor(pos) + ';border:1px solid ' + posColor(pos) + '30">' + initials(name) + '</div>';
+      html += '<div style="flex:1;min-width:0"><div class="pn">' + escHtml(name) + '</div><div class="pm">' + escHtml(team) + age + '</div></div>';
+      html += '<span class="' + posClass(pos) + '">' + pos + '</span>';
+      html += '</div>';
+    }
+  }
+
+  var taxi = S.myRoster ? (S.myRoster.taxi || []) : [];
+  if (taxi.length) {
+    html += '<div class="psh" style="margin-top:20px">Taxi &mdash; ' + taxi.length + '</div>';
+    for (var k = 0; k < taxi.length; k++) {
+      var tp = getPlayer(taxi[k]);
+      html += '<div class="pr"><div class="pav">' + initials(tp.full_name) + '</div><div style="flex:1"><div class="pn">' + escHtml(tp.full_name || String(taxi[k])) + '</div><div class="pm">' + escHtml(tp.team || 'FA') + '</div></div><span class="' + posClass(tp.position) + '">' + (tp.position || '?') + '</span></div>';
+    }
+  }
+
+  document.getElementById('roster-card').innerHTML = html;
+}
+
+// ---- WEAKNESS BARS ----
+
+function renderWeakness() {
+  var el = document.getElementById('weak-bars');
+  if (!el || !S.rosters.length) return;
+  var positions = ['QB','RB','WR','TE','K'];
+  var html = '';
+  for (var i = 0; i < positions.length; i++) {
+    var pos = positions[i];
+    var tot = 0;
+    for (var j = 0; j < S.rosters.length; j++) {
+      var rp = S.rosters[j].players || [];
+      for (var k = 0; k < rp.length; k++) {
+        if (S.players[rp[k]] && S.players[rp[k]].position === pos) tot++;
+      }
+    }
+    var avg = tot / (S.rosters.length || 1);
+    var mine = (S.byPos[pos] || []).length;
+    var ratio = avg > 0 ? Math.min(mine / (avg * 1.5), 1) : 0;
+    var color = ratio < 0.5 ? '#ff4d4d' : ratio < 0.75 ? '#f5a623' : '#22c55e';
+    html += '<div class="wr"><div class="wp">' + pos + '</div><div class="wt"><div class="wf" style="width:' + Math.round(ratio * 100) + '%;background:' + color + '"></div></div><div class="ws">' + mine + '/' + avg.toFixed(1) + '</div></div>';
+  }
+  el.innerHTML = html + '<div style="font-size:11px;color:var(--text3);margin-top:4px">Your count / league average</div>';
+}
+
+// ---- TRENDING ----
+
+function renderTrending() {
+  var el = document.getElementById('trend-list');
+  if (!el) return;
+  var names = [];
+  for (var i = 0; i < Math.min(S.trending.length, 15); i++) {
+    var t = S.trending[i];
+    var p = S.players[t.player_id];
+    if (!p) continue;
+    var on = S.myRoster && (S.myRoster.players || []).indexOf(t.player_id) !== -1;
+    names.push({ name: p.full_name, pos: p.position, on: on });
+  }
+  if (!names.length) { var tc = document.getElementById('trend-card'); if (tc) tc.style.display = 'none'; return; }
+  var html = '<div style="display:flex;flex-wrap:wrap">';
+  for (var j = 0; j < names.length; j++) {
+    var n = names[j];
+    var opacity = n.on ? 'opacity:0.4;' : '';
+    var arrow = n.on ? '<span style="font-size:10px;color:var(--text3)">on roster</span>' : '<span style="color:#22c55e;font-size:10px">&#8593;</span>';
+    html += '<div class="pill" style="' + opacity + '"><span class="' + posClass(n.pos) + '">' + (n.pos || '?') + '</span>' + escHtml(n.name) + arrow + '</div>';
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+// ---- TEAM LIST ----
+
+function renderTeamList() {
+  var el = document.getElementById('team-list');
+  if (!el) return;
+  teamLookup = {};
+  var html = '';
+  for (var i = 0; i < S.rosters.length; i++) {
+    var r = S.rosters[i];
+    if (String(r.owner_id) === String(S.userId)) continue;
+    var u = null;
+    for (var j = 0; j < S.users.length; j++) {
+      if (String(S.users[j].user_id) === String(r.owner_id)) { u = S.users[j]; break; }
+    }
+    var name = (u && u.metadata && u.metadata.team_name) ? u.metadata.team_name : (u && u.display_name) ? u.display_name : 'Team';
+    var wins = (r.settings && r.settings.wins) ? r.settings.wins : 0;
+    var losses = (r.settings && r.settings.losses) ? r.settings.losses : 0;
+    var pc = {};
+    var rp = r.players || [];
+    for (var k = 0; k < rp.length; k++) {
+      var pos = S.players[rp[k]] ? S.players[rp[k]].position : null;
+      if (pos) pc[pos] = (pc[pos] || 0) + 1;
+    }
+    var summary = Object.keys(pc).map(function(px) { return pc[px] + px; }).join(' ');
+    teamLookup[r.roster_id] = { name: name, wins: wins, losses: losses, roster: r };
+    html += '<div class="tr"><div style="flex:1;min-width:0"><div class="tn">' + escHtml(name) + '</div><div class="tm">' + wins + '-' + losses + ' &middot; ' + escHtml(summary) + '</div></div><button class="btn-b" onclick="doTargetedTrade(' + r.roster_id + ')">Trade ideas &#8594;</button></div>';
+  }
+  el.innerHTML = html || '<div style="font-size:13px;color:var(--text3)">No other teams found</div>';
+}
+
+// ---- RECENT TRADES ----
+
+function renderRecentTrades() {
+  var el = document.getElementById('recent-trades');
+  if (!el) return;
+  var trades = (S.transactions || []).filter(function(t) { return t.type === 'trade'; });
+  if (!trades.length) { el.innerHTML = '<div style="font-size:13px;color:var(--text3)">No trades recorded yet this season</div>'; return; }
+  var html = '';
+  for (var i = 0; i < Math.min(trades.length, 6); i++) {
+    var t = trades[i];
+    var grps = {};
+    var adds = t.adds || {};
+    Object.keys(adds).forEach(function(pid) {
+      var rid = adds[pid];
+      if (!grps[rid]) grps[rid] = [];
+      var p = S.players[pid];
+      if (p) grps[rid].push(p.full_name);
+    });
+    var sides = Object.keys(grps).map(function(rid) { return grps[rid]; });
+    if (sides.length < 2) continue;
+    html += '<div class="tic"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Week ' + (t.leg || '?') + '</div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:13px;font-weight:500">' + escHtml((sides[0] || []).join(', ')) + '</span><span style="color:var(--text3)">&harr;</span><span style="font-size:13px;font-weight:500">' + escHtml((sides[1] || []).join(', ')) + '</span></div></div>';
+  }
+  el.innerHTML = html || '<div style="font-size:13px;color:var(--text3)">No complete trade data available</div>';
+}
+
+// ---- AI FUNCTIONS ----
+
+async function doWaiverAI() {
+  setAI('waiv-ai', 'Analyzing your roster...', true);
+  var trendNames = S.trending.slice(0, 10).map(function(t) {
+    var p = S.players[t.player_id];
+    return p ? p.full_name + ' (' + p.position + ')' : null;
+  }).filter(function(n) { return n !== null; });
+  var prompt = rosterCtx() + '\n\nTrending pickups (48h): ' + (trendNames.join(', ') || 'none') + '\n\nAnalyze my roster and give me:\n1. My top 3 positional needs with specific reasoning\n2. Top 5 waiver targets to add right now with rationale for each\n3. Any bye-week or injury concerns to address\n4. One underowned sleeper worth stashing\n\nUse real current NFL player names.';
+  try {
+    var resp = await claudeAsk(prompt, 'You are an elite NFL fantasy football analyst. Give specific actionable waiver wire advice with real player names. Be concise.');
+    setAI('waiv-ai', resp);
+  } catch(e) { setAI('waiv-ai', 'Error: ' + e.message); }
+}
+
+async function doAskPlayer() {
+  var q = String(document.getElementById('pq').value || '').trim();
+  if (!q) return;
+  var el = document.getElementById('pq-resp');
+  el.style.display = 'block';
+  el.innerHTML = '<div class="ai" style="margin-top:12px"><div class="ail"><div class="aid"></div>Claude AI</div><div class="aic loading">Thinking...</div></div>';
+  try {
+    var resp = await claudeAsk(rosterCtx() + '\n\nQuestion: ' + q, 'You are a fantasy football expert. Answer start/sit, waiver, and trade questions directly and concisely.');
+    el.innerHTML = '<div class="ai" style="margin-top:12px"><div class="ail"><div class="aid"></div>Claude AI</div><div class="aic">' + escHtml(resp) + '</div></div>';
+  } catch(e) {
+    el.innerHTML = '<div class="ai" style="margin-top:12px"><div class="aic" style="color:var(--red)">' + escHtml(e.message) + '</div></div>';
+  }
+}
+
+async function doTradeAI() {
+  setAI('trade-ai', 'Scanning all ' + S.rosters.length + ' rosters...', true);
+  var others = S.rosters.filter(function(r) { return String(r.owner_id) !== String(S.userId); }).slice(0, 10).map(function(r) {
+    var u = null;
+    for (var j = 0; j < S.users.length; j++) { if (String(S.users[j].user_id) === String(r.owner_id)) { u = S.users[j]; break; } }
+    var name = (u && u.metadata && u.metadata.team_name) ? u.metadata.team_name : (u && u.display_name) ? u.display_name : 'Team';
+    var wins = (r.settings && r.settings.wins) || 0;
+    var losses = (r.settings && r.settings.losses) || 0;
+    var tp = (r.players || []).slice(0, 14).map(function(id) { var p = S.players[id]; return p ? p.full_name + ' (' + p.position + ')' : null; }).filter(function(x) { return x !== null; });
+    return name + ' (' + wins + '-' + losses + '): ' + tp.join(', ');
+  });
+  var prompt = rosterCtx() + '\n\nOther teams:\n' + others.join('\n') + '\n\nProvide:\n1. My 3 biggest weaknesses to address via trade\n2. Best 2-3 trade partners and why\n3. Three specific trade proposals with what I give, what I get, and why it works for both sides\n4. Which teams are sell-high vs buy-low\n\nBe specific with real player names.';
+  try {
+    var resp = await claudeAsk(prompt, 'You are an NFL fantasy trade specialist. Build realistic win-win trade proposals. Use real player names from the rosters listed.');
+    setAI('trade-ai', resp);
+  } catch(e) { setAI('trade-ai', 'Error: ' + e.message); }
+}
+
+async function doTargetedTrade(rosterId) {
+  var lookup = teamLookup[rosterId];
+  var teamName = lookup ? lookup.name : 'Team';
+  var container = document.getElementById('targeted-container');
+  container.innerHTML = '<div class="card"><div class="ct">Trade ideas with ' + escHtml(teamName) + '</div><div id="tgt-ai" class="ai"><div class="ail"><div class="aid"></div>Claude AI</div><div class="aic loading">Building trade scenarios...</div></div></div>';
+  container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  var tr = null;
+  for (var i = 0; i < S.rosters.length; i++) {
+    if (String(S.rosters[i].roster_id) === String(rosterId)) { tr = S.rosters[i]; break; }
+  }
+  if (!tr) return;
+
+  var wins = (tr.settings && tr.settings.wins) || 0;
+  var losses = (tr.settings && tr.settings.losses) || 0;
+  var tp = (tr.players || []).slice(0, 16).map(function(id) {
+    var p = S.players[id];
+    return p ? p.full_name + ' (' + p.position + ', ' + (p.team || 'FA') + ')' : null;
+  }).filter(function(x) { return x !== null; });
+
+  var prompt = rosterCtx() + '\n\nTarget team "' + teamName + '" (' + wins + '-' + losses + '):\n' + tp.join(', ') + '\n\nCreate 3 specific trade proposals. For each:\n- Players/picks I send\n- Players/picks I receive\n- Why it helps me\n- Why they would agree\n- Value: Fair / I win / They win\n\nOnly use players from the rosters listed.';
+  try {
+    var resp = await claudeAsk(prompt, 'You are a fantasy football trade negotiator. Build realistic mutually beneficial trade proposals using only listed players.');
+    document.getElementById('tgt-ai').innerHTML = '<div class="ail"><div class="aid"></div>Claude AI &mdash; ' + escHtml(teamName) + '</div><div class="aic">' + escHtml(resp) + '</div>';
+  } catch(e) {
+    var tgtEl = document.getElementById('tgt-ai');
+    if (tgtEl) tgtEl.innerHTML = '<div class="aic" style="color:var(--red)">' + escHtml(e.message) + '</div>';
+  }
+}
+
+async function doAnalyzeTrade() {
+  var give = String(document.getElementById('t-give').value || '').trim();
+  var recv = String(document.getElementById('t-recv').value || '').trim();
+  if (!give || !recv) return;
+  var el = document.getElementById('anal-resp');
+  el.innerHTML = '<div class="ai" style="margin-top:16px"><div class="ail"><div class="aid"></div>Claude AI</div><div class="aic loading">Evaluating trade value...</div></div>';
+  var prompt = rosterCtx() + '\n\nProposed trade:\nI give up: ' + give + '\nI receive: ' + recv + '\n\nAnalyze:\n1. Verdict - who wins and by how much?\n2. Value breakdown for each side\n3. How this changes my roster composition\n4. Age, injury, and schedule risk factors\n5. Should I accept, decline, or counter? If counter, suggest a specific counter-offer.';
+  try {
+    var resp = await claudeAsk(prompt, 'You are a fantasy football trade analyst. Give a direct honest verdict with clear reasoning.');
+    el.innerHTML = '<div class="ai" style="margin-top:16px"><div class="ail"><div class="aid"></div>Trade analysis</div><div class="aic">' + escHtml(resp) + '</div></div>';
+  } catch(e) {
+    el.innerHTML = '<div class="ai" style="margin-top:16px"><div class="aic" style="color:var(--red)">' + escHtml(e.message) + '</div></div>';
+  }
+}
+
+// ---- LEAGUE ANALYZER ----
+
+async function doLeagueAnalyzer() {
+  if (!S.league) { alert('Connect your Sleeper league first'); navTo('home'); return; }
+  laLoaded = true;
+
+  var allTeams = S.rosters.map(function(r) {
+    var u = null;
+    for (var j = 0; j < S.users.length; j++) { if (String(S.users[j].user_id) === String(r.owner_id)) { u = S.users[j]; break; } }
+    var name = (u && u.metadata && u.metadata.team_name) ? u.metadata.team_name : (u && u.display_name) ? u.display_name : 'Team';
+    var wins = (r.settings && r.settings.wins) || 0;
+    var losses = (r.settings && r.settings.losses) || 0;
+    var players = (r.players || []).slice(0, 14).map(function(id) {
+      var p = S.players[id]; return p ? p.full_name + '(' + p.position + ')' : null;
+    }).filter(function(x) { return x !== null; });
+    return { name: name, wins: wins, losses: losses, players: players, roster: r };
+  });
+
+  setAI('la-power', 'Analyzing all ' + allTeams.length + ' rosters...', true);
+  document.getElementById('la-trademap').innerHTML = '<div class="ail"><div class="aid"></div>Claude AI</div><div class="aic loading">Analyzing...</div>';
+
+  // Playoff probability bars
+  var sorted = allTeams.slice().sort(function(a, b) {
+    return (b.wins / (b.wins + b.losses + 0.01)) - (a.wins / (a.wins + a.losses + 0.01));
+  });
+  var playoffSpots = Math.floor(S.league.total_rosters / 3);
+  var pbHtml = '';
+  for (var i = 0; i < sorted.length; i++) {
+    var t = sorted[i];
+    var pOdds = Math.max(5, Math.min(95, i < playoffSpots ? 85 - i * 8 : 40 - (i - playoffSpots) * 10));
+    var barColor = pOdds > 60 ? '#22c55e' : pOdds > 35 ? '#f5a623' : '#ff4d4d';
+    pbHtml += '<div class="pbrow"><div class="pbr' + (i < 3 ? ' t3' : '') + '">' + (i + 1) + '</div><div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px;font-weight:500">' + escHtml(t.name) + '</span><span style="font-family:IBM Plex Mono,monospace;font-size:12px;color:var(--text2)">' + t.wins + '-' + t.losses + '</span></div><div class="pbw"><div class="pbf" style="width:' + pOdds + '%;background:' + barColor + '"></div></div></div><div style="font-family:IBM Plex Mono,monospace;font-size:12px;color:' + barColor + ';width:36px;text-align:right">' + pOdds + '%</div></div>';
+  }
+  document.getElementById('la-playoff').innerHTML = pbHtml + '<div style="font-size:11px;color:var(--text3);margin-top:8px">Estimated playoff probability</div>';
+
+  // Roster grades
+  var positions = ['QB','RB','WR','TE'];
+  var gradesHtml = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px"><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:8px 6px;color:var(--text2);font-weight:500">Team</th>';
+  for (var pi = 0; pi < positions.length; pi++) gradesHtml += '<th style="text-align:center;padding:8px 6px;color:var(--text2);font-weight:500">' + positions[pi] + '</th>';
+  gradesHtml += '<th style="text-align:center;padding:8px 6px;color:var(--text2);font-weight:500">Overall</th></tr>';
+
+  for (var ti = 0; ti < allTeams.length; ti++) {
+    var team = allTeams[ti];
+    var grades = [];
+    for (var gi = 0; gi < positions.length; gi++) {
+      var gpos = positions[gi];
+      var cnt = 0;
+      var rp2 = team.roster.players || [];
+      for (var ri = 0; ri < rp2.length; ri++) { if (S.players[rp2[ri]] && S.players[rp2[ri]].position === gpos) cnt++; }
+      var lavg = 0;
+      for (var si = 0; si < S.rosters.length; si++) {
+        var srp = S.rosters[si].players || [];
+        for (var sj = 0; sj < srp.length; sj++) { if (S.players[srp[sj]] && S.players[srp[sj]].position === gpos) lavg++; }
+      }
+      lavg = lavg / (S.rosters.length || 1);
+      var ratio2 = lavg > 0 ? cnt / lavg : 0;
+      grades.push(ratio2 >= 1.3 ? 'A' : ratio2 >= 1.0 ? 'B' : ratio2 >= 0.7 ? 'C' : 'D');
+    }
+    var aCount = grades.filter(function(g) { return g === 'A'; }).length;
+    var dCount = grades.filter(function(g) { return g === 'D'; }).length;
+    var overall = aCount >= 2 ? 'A' : dCount >= 2 ? 'D' : grades.indexOf('A') !== -1 ? 'B' : 'C';
+    gradesHtml += '<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 6px;font-weight:500">' + escHtml(team.name) + '</td>';
+    for (var gj = 0; gj < grades.length; gj++) gradesHtml += '<td style="text-align:center;padding:8px 6px"><span class="grpill gr' + grades[gj] + '">' + grades[gj] + '</span></td>';
+    gradesHtml += '<td style="text-align:center;padding:8px 6px"><span class="grpill gr' + overall + '">' + overall + '</span></td></tr>';
+  }
+  gradesHtml += '</table></div>';
+  document.getElementById('la-grades').innerHTML = gradesHtml;
+
+  var rosterSummary = allTeams.map(function(t) { return t.name + ' (' + t.wins + '-' + t.losses + '): ' + t.players.slice(0, 10).join(', '); }).join('\n');
+  var pwrPrompt = 'League: ' + S.league.name + ' (' + S.league.total_rosters + ' teams, ' + scoringType() + ' scoring)\n\nAll teams:\n' + rosterSummary + '\n\nGenerate:\n1. Power rankings 1-' + allTeams.length + ' with 1-sentence reasoning for each\n2. 3 teams on the rise and why\n3. 3 teams falling off and why';
+  var tmPrompt = 'League: ' + S.league.name + '\n\nAll teams:\n' + rosterSummary + '\n\nIdentify:\n1. Teams that should be SELLING (dealing veterans for picks) - name each and who to trade\n2. Teams that should be BUYING and going all-in - name each and who to target\n3. Two specific cross-team trades that would benefit both sides';
+
+  try {
+    var results = await Promise.all([
+      claudeAsk(pwrPrompt, 'You are an NFL fantasy league analyst. Generate power rankings with specific opinionated reasoning.'),
+      claudeAsk(tmPrompt, 'You are an NFL fantasy trade strategist. Identify buy-low and sell-high opportunities.')
+    ]);
+    setAI('la-power', results[0]);
+    document.getElementById('la-trademap').innerHTML = '<div class="ail"><div class="aid"></div>Claude AI</div><div class="aic">' + escHtml(results[1]) + '</div>';
+  } catch(e) { setAI('la-power', 'Error: ' + e.message); }
+}
+
+// ---- PLAYER RANKINGS ----
+
+function setRkPos(pos) {
+  rkPos = pos;
+  var tabs = ['all','qb','rb','wr','te','flex'];
+  var btns = document.querySelectorAll('#rk-pos-tabs .rtab');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', tabs[i] === pos);
+  if (rkLoaded) doRankings();
+}
+
+function setRkView(view) {
+  rkView = view;
+  document.getElementById('rk-w').classList.toggle('active', view === 'weekly');
+  document.getElementById('rk-r').classList.toggle('active', view === 'ros');
+  if (rkLoaded) doRankings();
+}
+
+async function doRankings() {
+  rkLoaded = true;
+  var posLabels = { all:'all positions', qb:'quarterbacks', rb:'running backs', wr:'wide receivers', te:'tight ends', flex:'flex-eligible players (RB/WR/TE)' };
+  var posLabel = posLabels[rkPos] || rkPos;
+  var viewLabel = rkView === 'weekly' ? 'this week' : 'rest of season';
+  setAI('rk-content', 'Generating ' + posLabel + ' rankings for ' + viewLabel + '...', true);
+  document.getElementById('rk-news').innerHTML = '<div class="ail"><div class="aid"></div>Claude AI</div><div class="aic loading">Loading...</div>';
+
+  var myPlayers = S.allPlayers.length ? '\n\nMy roster: ' + S.allPlayers.map(function(p) { return p.full_name; }).filter(Boolean).join(', ') : '';
+  var prompt = 'League: ' + scoringType() + ' scoring' + myPlayers + '\n\nGenerate top 24 fantasy football rankings for ' + posLabel + ' for ' + viewLabel + '.\n\nFormat each as:\n[Rank]. [Player Name] ([Team]) - [1 sentence reason]\n\nHighlight players on my roster with a star symbol. Include tier breaks. Be specific about matchups if weekly.';
+  var newsPrompt = 'League: ' + scoringType() + ' scoring' + myPlayers + '\n\nList 5-8 key injury and news items fantasy managers need to know this week. Include impact level HIGH, MED, or LOW for each.';
+
+  try {
+    var results = await Promise.all([
+      claudeAsk(prompt, 'You are a top fantasy football analyst. Generate detailed specific rankings. Mark my roster players with a star symbol.'),
+      claudeAsk(newsPrompt, 'You are a fantasy football news analyst. Summarize key injury and usage news affecting player values.')
+    ]);
+    setAI('rk-content', results[0]);
+    document.getElementById('rk-news').innerHTML = '<div class="ail"><div class="aid"></div>Claude AI</div><div class="aic">' + escHtml(results[1]) + '</div>';
+  } catch(e) { setAI('rk-content', 'Error: ' + e.message); }
+}
+
+// ---- BETTING LINES ----
+
+function setBetView(view) {
+  betView = view;
+  var views = ['games','props','ai'];
+  var btns = document.querySelectorAll('#bet-tabs .rtab');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', views[i] === view);
+  document.getElementById('bet-games').style.display = view === 'games' ? '' : 'none';
+  document.getElementById('bet-props').style.display = view === 'props' ? '' : 'none';
+  document.getElementById('bet-ai').style.display = view === 'ai' ? '' : 'none';
+  if (view === 'games' && !betLoaded) loadBettingLines();
+  if (view === 'props' && betGames.length) renderGameSelector();
+}
+
+async function loadBettingLines() {
+  betLoaded = true;
+  var el = document.getElementById('bet-gc');
+  el.innerHTML = '<div class="lw" style="height:200px"><div class="spin"></div><div class="lbl">Fetching lines...</div></div>';
+  try {
+    var r = await fetch('/api/odds?type=lines');
+    var data = await r.json();
+    if (data.error) throw new Error(data.error);
+    if (!data.length) {
+      el.innerHTML = '<div class="offnotice"><div style="font-size:32px;margin-bottom:12px">&#127944;</div><div style="font-size:16px;font-weight:600;margin-bottom:6px">NFL Offseason</div><div style="font-size:13px;color:var(--text2);line-height:1.7">No games currently scheduled. Lines appear here during the NFL season (September through January) and playoffs.</div></div>';
+      return;
+    }
+    betGames = data;
+    gameLookup = {};
+    for (var gi = 0; gi < data.length; gi++) gameLookup[data[gi].id] = data[gi];
+    var html = '';
+    for (var i = 0; i < Math.min(data.length, 16); i++) {
+      var game = data[i];
+      var dt = new Date(game.commence_time);
+      var timeStr = dt.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) + ' &middot; ' + dt.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+      var spread = { home:'--', away:'--', book:'' };
+      var ml = { home:'--', away:'--', book:'' };
+      var total = '--', totalBook = '';
+      if (game.bookmakers) {
+        for (var bi = 0; bi < game.bookmakers.length; bi++) {
+          var bm = game.bookmakers[bi];
+          if (!bm.markets) continue;
+          for (var mi = 0; mi < bm.markets.length; mi++) {
+            var mkt = bm.markets[mi];
+            if (mkt.key === 'spreads' && spread.home === '--' && mkt.outcomes) {
+              var ho = null, ao = null;
+              for (var oi = 0; oi < mkt.outcomes.length; oi++) {
+                if (mkt.outcomes[oi].name === game.home_team) ho = mkt.outcomes[oi];
+                if (mkt.outcomes[oi].name === game.away_team) ao = mkt.outcomes[oi];
+              }
+              if (ho && ao) { spread.home = (ho.point > 0 ? '+' : '') + ho.point + ' (' + formatOdds(ho.price) + ')'; spread.away = (ao.point > 0 ? '+' : '') + ao.point + ' (' + formatOdds(ao.price) + ')'; spread.book = bm.title; }
+            }
+            if (mkt.key === 'h2h' && ml.home === '--' && mkt.outcomes) {
+              var hml = null, aml = null;
+              for (var oli = 0; oli < mkt.outcomes.length; oli++) {
+                if (mkt.outcomes[oli].name === game.home_team) hml = mkt.outcomes[oli];
+                if (mkt.outcomes[oli].name === game.away_team) aml = mkt.outcomes[oli];
+              }
+              if (hml && aml) { ml.home = formatOdds(hml.price); ml.away = formatOdds(aml.price); ml.book = bm.title; }
+            }
+            if (mkt.key === 'totals' && total === '--' && mkt.outcomes) {
+              for (var toi = 0; toi < mkt.outcomes.length; toi++) {
+                if (mkt.outcomes[toi].name === 'Over') { total = 'O/U ' + mkt.outcomes[toi].point; totalBook = bm.title; break; }
+              }
+            }
+          }
+        }
+      }
+      html += '<div class="gc"><div class="gt">' + timeStr + '</div><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><span style="font-size:15px;font-weight:600">' + escHtml(game.away_team) + '</span><span style="font-size:12px;color:var(--text3);font-family:IBM Plex Mono,monospace">@</span><span style="font-size:15px;font-weight:600">' + escHtml(game.home_team) + '</span></div><div class="og"><div class="oc"><div class="ol">Spread</div><div class="ov">' + escHtml(spread.away) + ' / ' + escHtml(spread.home) + '</div><div class="ob">' + escHtml(spread.book) + '</div></div><div class="oc"><div class="ol">Moneyline</div><div class="ov">' + escHtml(ml.away) + ' / ' + escHtml(ml.home) + '</div><div class="ob">' + escHtml(ml.book) + '</div></div><div class="oc"><div class="ol">Total</div><div class="ov">' + escHtml(total) + '</div><div class="ob">' + escHtml(totalBook) + '</div></div></div></div>';
+    }
+    el.innerHTML = html + '<div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center">Lines from FanDuel, DraftKings, BetMGM, Caesars &middot; Refresh for latest</div>';
+    renderGameSelector();
+  } catch(e) {
+    el.innerHTML = '<div class="offnotice"><div style="font-size:32px;margin-bottom:12px">&#9888;</div><div style="font-size:16px;font-weight:600;margin-bottom:6px">Odds Unavailable</div><div style="font-size:13px;color:var(--text2);line-height:1.7">' + (e.message === 'Odds API key not configured' ? 'Add ODDS_API_KEY in Vercel environment variables to enable live betting lines.' : escHtml(e.message)) + '</div></div>';
+  }
+}
+
+function renderGameSelector() {
+  var el = document.getElementById('bet-gsel');
+  if (!el || !betGames.length) return;
+  var html = '';
+  for (var i = 0; i < Math.min(betGames.length, 16); i++) {
+    var g = betGames[i];
+    var dt = new Date(g.commence_time);
+    var dateStr = dt.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+    html += '<div class="tr"><div style="flex:1"><div class="tn">' + escHtml(g.away_team) + ' @ ' + escHtml(g.home_team) + '</div><div class="tm">' + dateStr + '</div></div><button class="btn-b" onclick="doLoadProps(\'' + g.id + '\')">View props &#8594;</button></div>';
+  }
+  el.innerHTML = html;
+}
+
+async function doLoadProps(eventId) {
+  var game = gameLookup[eventId];
+  var gameName = game ? game.away_team + ' @ ' + game.home_team : 'Game';
+  var el = document.getElementById('bet-pc');
+  el.innerHTML = '<div class="card"><div class="ct">' + escHtml(gameName) + '</div><div class="lw" style="height:150px"><div class="spin"></div><div class="lbl">Loading props...</div></div></div>';
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  try {
+    var r = await fetch('/api/odds?type=props&eventId=' + eventId);
+    var data = await r.json();
+    if (data.error) throw new Error(data.error);
+    var markets = {};
+    if (data.bookmakers) {
+      for (var bi = 0; bi < data.bookmakers.length; bi++) {
+        var bm = data.bookmakers[bi];
+        if (!bm.markets) continue;
+        for (var mi = 0; mi < bm.markets.length; mi++) {
+          var mkt = bm.markets[mi];
+          if (!markets[mkt.key]) markets[mkt.key] = {};
+          if (!mkt.outcomes) continue;
+          for (var oi = 0; oi < mkt.outcomes.length; oi++) {
+            var o = mkt.outcomes[oi];
+            var key = (o.description || '') + '|' + o.name;
+            if (!markets[mkt.key][key]) markets[mkt.key][key] = { player: o.description, side: o.name, point: o.point, price: o.price, book: bm.title };
+          }
+        }
+      }
+    }
+    var mktLabels = { player_pass_yds:'Passing Yards', player_pass_tds:'Passing TDs', player_rush_yds:'Rushing Yards', player_reception_yds:'Receiving Yards', player_receiving_tds:'Receiving TDs', player_rushing_tds:'Rushing TDs' };
+    var html = '<div class="card"><div class="ct">' + escHtml(gameName) + ' &mdash; Props</div>';
+    var mkeys = Object.keys(markets);
+    if (!mkeys.length) {
+      html = '<div class="card"><div class="ct">' + escHtml(gameName) + '</div><div style="font-size:13px;color:var(--text3);margin-top:8px">No prop lines available yet for this game.</div></div>';
+    } else {
+      for (var ki = 0; ki < mkeys.length; ki++) {
+        var mkey = mkeys[ki];
+        var props = markets[mkey];
+        var label = mktLabels[mkey] || mkey;
+        html += '<div style="margin-top:14px"><div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">' + escHtml(label) + '</div>';
+        var players = {};
+        var pkeys = Object.keys(props);
+        for (var pki = 0; pki < pkeys.length; pki++) {
+          var pp = props[pkeys[pki]];
+          if (!players[pp.player]) players[pp.player] = [];
+          players[pp.player].push(pp);
+        }
+        var plkeys = Object.keys(players).slice(0, 10);
+        for (var pli = 0; pli < plkeys.length; pli++) {
+          var plname = plkeys[pli];
+          var sides = players[plname];
+          var over = null, under = null;
+          for (var si = 0; si < sides.length; si++) {
+            if (sides[si].side === 'Over') over = sides[si];
+            if (sides[si].side === 'Under') under = sides[si];
+          }
+          html += '<div class="pprow"><div><div style="font-weight:500;font-size:13px">' + escHtml(plname) + '</div><div style="font-size:11px;color:var(--text2);margin-top:2px">' + escHtml(label) + ' &middot; ' + escHtml((over && over.book) || '') + '</div></div><div><div class="ppr">' + (over && over.point !== undefined ? over.point : '--') + '</div><div class="ppo">O ' + formatOdds(over && over.price) + ' / U ' + formatOdds(under && under.price) + '</div></div></div>';
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+    el.innerHTML = html;
+  } catch(e) { el.innerHTML = '<div class="card"><div style="color:var(--red);font-size:13px">' + escHtml(e.message) + '</div></div>'; }
+}
+
+async function doBetAI() {
+  document.getElementById('bet-aic').innerHTML = '<div class="ail"><div class="aid"></div>Claude AI</div><div class="aic loading">Analyzing this week\'s lines...</div>';
+  var gamesCtx = betGames.slice(0, 8).map(function(g) {
+    var spread = null, total = null;
+    if (g.bookmakers && g.bookmakers[0] && g.bookmakers[0].markets) {
+      for (var mi = 0; mi < g.bookmakers[0].markets.length; mi++) {
+        var mkt = g.bookmakers[0].markets[mi];
+        if (mkt.key === 'spreads' && mkt.outcomes) {
+          var fav = mkt.outcomes[0];
+          for (var oi = 0; oi < mkt.outcomes.length; oi++) { if (mkt.outcomes[oi].point < fav.point) fav = mkt.outcomes[oi]; }
+          spread = fav.name + ' ' + fav.point;
+        }
+        if (mkt.key === 'totals' && mkt.outcomes) {
+          for (var ti2 = 0; ti2 < mkt.outcomes.length; ti2++) { if (mkt.outcomes[ti2].name === 'Over') { total = 'O/U ' + mkt.outcomes[ti2].point; break; } }
+        }
+      }
+    }
+    return g.away_team + ' @ ' + g.home_team + (spread ? ' (' + spread + ')' : '') + (total ? ' ' + total : '');
+  }).join('\n');
+  var myRosterCtx = S.allPlayers.length ? '\nMy roster: ' + S.allPlayers.map(function(p) { return p.full_name; }).filter(Boolean).join(', ') : '';
+  var prompt = 'This week NFL games with lines:\n' + (gamesCtx || 'No games currently scheduled (offseason)') + myRosterCtx + '\n\nProvide:\n1. 3 best bets this week (spread or total) with reasoning\n2. 3 player props to target and why\n3. Games with highest fantasy scoring upside for stacking\n4. Any notable line movements to be aware of';
+  try {
+    var resp = await claudeAsk(prompt, 'You are an expert NFL betting analyst and fantasy football expert. Give specific well-reasoned picks. Note if it is the offseason.');
+    document.getElementById('bet-aic').innerHTML = '<div class="ail"><div class="aid"></div>Claude AI</div><div class="aic">' + escHtml(resp) + '</div>';
+  } catch(e) {
+    document.getElementById('bet-aic').innerHTML = '<div class="ail"><div class="aid"></div>Claude AI</div><div class="aic" style="color:var(--red)">' + escHtml(e.message) + '</div>';
+  }
+}
+</script>
+</body>
+</html>
