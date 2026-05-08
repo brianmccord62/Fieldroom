@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FieldRoom — Fantasy AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--bg2:#111118;--bg3:#16161f;--bg4:#1c1c28;--sidebar:#0d0d14;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--accent:#3b6fff;--accent-dim:rgba(59,111,255,0.15);--accent-dim2:rgba(59,111,255,0.08);--accent-hover:#5580ff;--text:#f0f2f8;--text2:#8b90a4;--text3:#4a5068;--red:#ff4d4d;--amber:#f5a623;--green:#22c55e;--soon:#c9a227;--qb:#ffb547;--rb:#22c55e;--wr:#3b6fff;--te:#ff7eb3;--k:#9b7fff;--def:#8b90a4;--r:8px;--r-sm:5px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;display:flex;overflow:hidden}
+.mono{font-family:'IBM Plex Mono',monospace}
+
+/* SIDEBAR */
+#sidebar{width:240px;min-width:240px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto;flex-shrink:0}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-icon{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sb-logo-text{font-size:17px;font-weight:700;letter-spacing:-0.3px}
+.sb-logo-beta{font-size:10px;font-weight:600;background:var(--accent-dim);color:var(--accent);padding:2px 7px;border-radius:4px;margin-left:6px;letter-spacing:0.04em}
+.sb-section{padding:12px 0}
+.sb-item{display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;color:var(--text2);font-size:13.5px;font-weight:500;border-radius:0;transition:background 0.12s,color 0.12s;position:relative;margin:1px 8px;border-radius:6px}
+.sb-item:hover{background:var(--bg3);color:var(--text)}
+.sb-item.active{background:var(--accent-dim);color:var(--accent)}
+.sb-item svg{width:16px;height:16px;flex-shrink:0;opacity:0.7}
+.sb-item.active svg{opacity:1}
+.sb-soon{font-size:10px;font-weight:700;color:var(--soon);margin-left:auto;letter-spacing:0.06em}
+.sb-divider{height:1px;background:var(--border);margin:6px 16px}
+.sb-bottom{margin-top:auto;padding:12px 0;border-top:1px solid var(--border)}
+.sb-connect-btn{margin:10px 12px 6px;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:13px;font-weight:500;padding:10px 14px;cursor:pointer;width:calc(100% - 24px);text-align:center;transition:background 0.12s}
+.sb-connect-btn:hover{background:var(--bg3)}
+.sb-connect-btn.connected{color:var(--green);border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.08)}
+
+/* MAIN */
+#main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+#topbar{height:52px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0;background:var(--bg)}
+.topbar-title{font-size:16px;font-weight:600}
+.topbar-badge{font-size:10px;font-weight:700;background:var(--accent-dim);color:var(--accent);padding:2px 8px;border-radius:4px;letter-spacing:0.06em}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.topbar-icon-btn{width:34px;height:34px;background:transparent;border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);transition:background 0.12s}
+.topbar-icon-btn:hover{background:var(--bg3);color:var(--text)}
+#content{flex:1;overflow-y:auto;padding:28px 28px 60px}
+
+/* SCREENS */
+.screen{display:none}.screen.active{display:block}
+
+/* CONNECT */
+.connect-wrap{max-width:480px;margin:60px auto;padding:0 12px}
+.connect-logo{width:60px;height:60px;background:var(--accent-dim);border:1px solid var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 24px}
+.connect-title{font-size:32px;font-weight:700;text-align:center;margin-bottom:8px;letter-spacing:-0.5px}
+.connect-sub{text-align:center;color:var(--text2);font-size:14px;margin-bottom:36px}
+.connect-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:28px}
+.field-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+input[type=text],input[type=email],select,textarea{width:100%;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;padding:10px 13px;outline:none;transition:border-color 0.15s}
+input[type=text]:focus,select:focus,textarea:focus{border-color:var(--accent)}
+.input-icon-wrap{position:relative}
+.input-icon-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text3)}
+.input-icon-wrap input{padding-left:38px}
+.btn-primary{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:11px 20px;cursor:pointer;margin-top:14px;transition:background 0.15s,transform 0.1s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-primary:active{transform:scale(0.98)}
+.btn-primary:disabled{opacity:0.4;cursor:not-allowed}
+.btn-ghost{background:transparent;border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text2);font-family:'Inter',sans-serif;font-size:13px;padding:8px 14px;cursor:pointer;transition:border-color 0.15s,color 0.15s}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+.btn-blue{background:var(--accent-dim);border:1px solid rgba(59,111,255,0.3);border-radius:var(--r-sm);color:var(--accent);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:7px 14px;cursor:pointer;transition:background 0.15s;white-space:nowrap}
+.btn-blue:hover{background:rgba(59,111,255,0.22)}
+.error-msg{margin-top:10px;font-size:13px;color:var(--red)}
+.note{font-size:12px;color:var(--text3);text-align:center;margin-top:16px}
+.divider-text{display:flex;align-items:center;gap:10px;margin:20px 0;color:var(--text3);font-size:12px}
+.divider-text::before,.divider-text::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* LOADING */
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px}
+.spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-label{font-size:13px;color:var(--text2);font-family:'IBM Plex Mono',monospace}
+
+/* LEAGUE SELECTOR */
+.league-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:8px;cursor:pointer;transition:border-color 0.15s,background 0.15s;display:flex;align-items:center;justify-content:space-between}
+.league-card:hover{border-color:var(--accent);background:var(--bg4)}
+.league-name{font-size:15px;font-weight:600}
+.league-meta{font-size:12px;color:var(--text2);margin-top:3px}
+
+/* STATS GRID */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:24px}
+.stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.stat-lbl{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+.stat-num{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:500}
+
+/* CARDS */
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;margin-bottom:14px}
+.card-title{font-size:15px;font-weight:600;margin-bottom:4px}
+.card-sub{font-size:13px;color:var(--text2);margin-bottom:16px}
+
+/* PAGE HEADER */
+.page-header{margin-bottom:24px}
+.page-title{font-size:22px;font-weight:700;letter-spacing:-0.3px}
+.page-sub{font-size:13px;color:var(--text2);margin-top:4px}
+.team-label{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px}
+
+/* PLAYER ROWS */
+.pos-badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px}
+.pos-QB{background:rgba(255,181,71,0.15);color:var(--qb)}
+.pos-RB{background:rgba(34,197,94,0.15);color:var(--rb)}
+.pos-WR{background:rgba(59,111,255,0.15);color:var(--wr)}
+.pos-TE{background:rgba(255,126,179,0.15);color:var(--te)}
+.pos-K{background:rgba(155,127,255,0.15);color:var(--k)}
+.pos-DEF{background:rgba(139,144,164,0.15);color:var(--def)}
+.player-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}
+.player-row:last-child{border-bottom:none}
+.p-avatar{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;flex-shrink:0;background:var(--bg4);color:var(--text2)}
+.p-name{font-weight:500;font-size:14px}
+.p-meta{font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace}
+.pos-section-hdr{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 6px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+
+/* AI BOX */
+.ai-box{background:var(--bg4);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--r-sm);padding:16px 18px;margin-top:14px}
+.ai-label{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ai-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.ai-content{font-size:13.5px;line-height:1.8;color:var(--text);white-space:pre-wrap}
+.ai-content.loading{color:var(--text2);font-style:italic}
+
+/* WEAKNESS BARS */
+.weakness-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.weakness-pos{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);width:32px}
+.weakness-track{flex:1;height:4px;background:var(--bg4);border-radius:2px}
+.weakness-fill{height:100%;border-radius:2px;transition:width 0.6s ease}
+.weakness-score{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);width:30px;text-align:right}
+
+/* TEAM ROWS */
+.team-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:10px}
+.team-row:last-child{border-bottom:none}
+.t-name{font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-meta{font-size:12px;color:var(--text2);margin-top:2px;font-family:'IBM Plex Mono',monospace}
+
+/* TRENDING PILLS */
+.trend-pill{display:inline-flex;align-items:center;gap:6px;background:var(--bg4);border:1px solid var(--border);border-radius:99px;padding:5px 12px;font-size:12px;margin:3px}
+.trend-up{font-size:10px;color:var(--green)}
+
+/* TRADE IDEAS */
+.trade-idea-card{background:var(--bg4);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px 15px;margin-bottom:8px}
+.trade-dir{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+
+/* ANALYZER */
+.trade-inputs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:560px){.trade-inputs{grid-template-columns:1fr}}
+textarea{resize:none;background:var(--bg4);border:1px solid var(--border);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:10px 12px;border-radius:var(--r-sm);outline:none;width:100%;line-height:1.6}
+textarea:focus{border-color:var(--accent)}
+
+/* COMING SOON PAGE */
+.soon-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:55vh;gap:12px;text-align:center}
+.soon-badge{font-size:12px;font-weight:700;background:rgba(201,162,39,0.15);color:var(--soon);padding:4px 12px;border-radius:99px;letter-spacing:0.08em;margin-bottom:4px}
+.soon-title{font-size:24px;font-weight:700;letter-spacing:-0.3px}
+.soon-desc{font-size:14px;color:var(--text2);max-width:340px;line-height:1.7}
+
+/* RANK / BET TABS */
+.rk-tab{background:var(--bg4);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text2);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;padding:6px 14px;cursor:pointer;transition:all 0.12s}
+.rk-tab:hover{color:var(--text);border-color:var(--border2)}
+.rk-tab.active{background:var(--accent-dim);border-color:rgba(59,111,255,0.4);color:var(--accent)}
+
+/* GAME CARDS */
+.game-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:10px}
+.game-teams{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.game-team{font-size:15px;font-weight:600}
+.game-vs{font-size:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace}
+.game-time{font-size:12px;color:var(--text2);margin-bottom:12px;font-family:'IBM Plex Mono',monospace}
+.odds-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.odds-cell{background:var(--bg4);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 10px}
+.odds-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
+.odds-val{font-size:13px;font-weight:600;font-family:'IBM Plex Mono',monospace;color:var(--text)}
+.odds-book{font-size:10px;color:var(--text3);margin-top:2px}
+.prop-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.prop-row:last-child{border-bottom:none}
+.prop-player{font-weight:500;font-size:13px}
+.prop-market{font-size:11px;color:var(--text2);margin-top:2px}
+.prop-line{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;text-align:right}
+.prop-ou{font-size:11px;color:var(--text2);text-align:right;margin-top:2px}
+.grade-pill{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:3px 9px;border-radius:4px}
+.grade-A{background:rgba(34,197,94,0.15);color:var(--green)}
+.grade-B{background:rgba(59,111,255,0.15);color:var(--accent)}
+.grade-C{background:rgba(245,166,35,0.15);color:var(--amber)}
+.grade-D{background:rgba(255,77,77,0.15);color:var(--red)}
+.power-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.power-row:last-child{border-bottom:none}
+.power-rank{font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:500;width:28px;color:var(--text3)}
+.power-rank.top3{color:var(--accent)}
+.playoff-bar-wrap{flex:1;height:6px;background:var(--bg4);border-radius:3px}
+.playoff-bar{height:100%;border-radius:3px;transition:width 0.8s ease}
+.offseason-notice{background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:24px;text-align:center;margin-bottom:14px}
+.offseason-icon{font-size:32px;margin-bottom:12px}
+.offseason-title{font-size:16px;font-weight:600;margin-bottom:6px}
+.offseason-desc{font-size:13px;color:var(--text2);line-height:1.7}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">🏈</div>
+    <span class="sb-logo-text">FieldRoom</span>
+    <span class="sb-logo-beta">BETA</span>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-item active" id="nav-home" onclick="navTo('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </div>
+    <div class="sb-item" id="nav-rankings" onclick="navTo('rankings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Player Rankings
+    </div>
+    <div class="sb-item" id="nav-matchup" onclick="navTo('matchup')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+      Matchup
+    </div>
+    <div class="sb-item" id="nav-team" onclick="navTo('team')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Team
+    </div>
+    <div class="sb-item" id="nav-waivers" onclick="navTo('waivers')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Waivers
+    </div>
+    <div class="sb-item" id="nav-trades" onclick="navTo('trades')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Trade Ideas
+    </div>
+    <div class="sb-item" id="nav-analyzer" onclick="navTo('analyzer')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Trade Analyzer
+    </div>
+    <div class="sb-item" id="nav-gameslate" onclick="navTo('gameslate')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Game Slate
+    </div>
+    <div class="sb-item" id="nav-trends" onclick="navTo('trends')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      Trends
+    </div>
+    <div class="sb-item" id="nav-betting" onclick="navTo('betting')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Betting Lines
+    </div>
+  </div>
+
+  <div class="sb-divider"></div>
+
+  <div class="sb-section">
+    <div class="sb-item" id="nav-research" onclick="navTo('research')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      Research
+      <span class="sb-soon">SOON</span>
+    </div>
+    <div class="sb-item" id="nav-leagueanalyzer" onclick="navTo('leagueanalyzer')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      League Analyzer
+      <span class="sb-soon">SOON</span>
+    </div>
+    <div class="sb-item" id="nav-draftrankings" onclick="navTo('draftrankings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Draft Rankings
+      <span class="sb-soon">SOON</span>
+    </div>
+    <div class="sb-item" id="nav-playoff" onclick="navTo('playoff')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>
+      Playoff Predictor
+      <span class="sb-soon">SOON</span>
+    </div>
+    <div class="sb-item" id="nav-articles" onclick="navTo('articles')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Articles
+    </div>
+  </div>
+
+  <div class="sb-divider"></div>
+  <div class="sb-section">
+    <div class="sb-item" id="nav-pricing" onclick="navTo('pricing')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Pricing
+    </div>
+    <div class="sb-item" id="nav-settings" onclick="navTo('settings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </div>
+  </div>
+
+  <div class="sb-bottom">
+    <button class="sb-connect-btn" id="sb-connect-btn" onclick="handleSidebarConnect()">Sign in to connect leagues</button>
+  </div>
+</nav>
+
+<!-- MAIN AREA -->
+<div id="main">
+  <div id="topbar">
+    <span class="topbar-title" id="topbar-title">FieldRoom</span>
+    <span class="topbar-badge" id="topbar-badge" style="display:none">BETA</span>
+    <div class="topbar-right">
+      <div class="topbar-icon-btn" title="Search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <div class="topbar-icon-btn" id="user-btn" title="Account" onclick="handleSidebarConnect()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <!-- HOME -->
+    <div class="screen active" id="page-home">
+      <div id="home-connect-area">
+        <div class="connect-wrap">
+          <div class="connect-logo">🏈</div>
+          <h1 class="connect-title">Welcome back</h1>
+          <p class="connect-sub">Sign in to your FieldRoom account to connect your Sleeper leagues</p>
+          <div class="connect-card">
+            <div class="field-label">Sleeper username</div>
+            <div class="input-icon-wrap" style="margin-bottom:14px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <input type="text" id="username-input" placeholder="your sleeper username" autocomplete="off" onkeydown="if(event.key==='Enter')connectSleeper()" />
+            </div>
+            <button class="btn-primary" id="connect-btn" onclick="connectSleeper()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+              Sign in →
+            </button>
+            <div id="connect-error" class="error-msg" style="display:none"></div>
+            <div class="divider-text">or</div>
+            <p style="font-size:13px;color:var(--text2);text-align:center">Don't have an account? <span style="color:var(--accent);cursor:pointer" onclick="connectSleeper()">Sign up for free</span></p>
+          </div>
+          <p class="note">Read-only · No login required · Sleeper public API</p>
+        </div>
+      </div>
+      <div id="home-dashboard" style="display:none">
+        <div class="page-header">
+          <div class="team-label" id="dash-league-name"></div>
+          <div class="page-title" id="dash-team-name"></div>
+          <div style="font-size:13px;color:var(--text2);margin-top:4px" id="dash-record"></div>
+        </div>
+        <div class="stat-grid" id="dash-stat-grid"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="card" style="cursor:pointer" onclick="navTo('team')">
+            <div class="card-title">My Roster</div>
+            <div class="card-sub">View full player roster</div>
+            <div id="dash-pos-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+          </div>
+          <div class="card" style="cursor:pointer" onclick="navTo('trades')">
+            <div class="card-title">Trade Ideas</div>
+            <div class="card-sub">AI-powered trade targets</div>
+            <div style="margin-top:8px;font-size:13px;color:var(--text2)" id="dash-weakness-preview"></div>
+          </div>
+          <div class="card" style="cursor:pointer" onclick="navTo('waivers')">
+            <div class="card-title">Waiver Wire</div>
+            <div class="card-sub">Top pickups this week</div>
+            <div id="dash-trending-preview" style="margin-top:8px"></div>
+          </div>
+          <div class="card" style="cursor:pointer" onclick="navTo('analyzer')">
+            <div class="card-title">Trade Analyzer</div>
+            <div class="card-sub">Evaluate any trade offer</div>
+            <div style="margin-top:8px;font-size:13px;color:var(--text2)">Enter players to get an instant AI verdict on trade value</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn-ghost" onclick="switchLeague()" id="switch-league-btn" style="display:none">Switch league</button>
+          <button class="btn-ghost" onclick="resetApp()">Disconnect</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOADING -->
+    <div class="screen" id="page-loading">
+      <div class="loading-wrap">
+        <div class="spinner"></div>
+        <div class="loading-label" id="loading-msg">Loading...</div>
+      </div>
+    </div>
+
+    <!-- LEAGUE SELECTOR -->
+    <div class="screen" id="page-leagues">
+      <div class="page-header"><div class="page-title">Choose a league</div></div>
+      <div id="leagues-list" style="max-width:520px"></div>
+      <button class="btn-ghost" onclick="showPage('home')" style="margin-top:12px">← Back</button>
+    </div>
+
+    <!-- TEAM / ROSTER -->
+    <div class="screen" id="page-team">
+      <div class="page-header">
+        <div class="page-title">Team</div>
+        <div class="page-sub">Your full roster breakdown</div>
+      </div>
+      <div class="card" id="roster-card"><div style="color:var(--text2)">Connect your league to see your roster</div></div>
+    </div>
+
+    <!-- WAIVERS / DRAFT -->
+    <div class="screen" id="page-waivers">
+      <div class="page-header">
+        <div class="page-title">Waivers</div>
+        <div class="page-sub">AI waiver wire and free agent recommendations</div>
+      </div>
+      <div class="card">
+        <div class="card-title">AI recommendations</div>
+        <div class="card-sub">Personalized pickups based on your roster gaps and current trends</div>
+        <div id="draft-ai" class="ai-box"><div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content loading">Click below to analyze your roster and get waiver targets</div></div>
+        <button class="btn-blue" onclick="loadDraftAI()" style="margin-top:14px">Get recommendations →</button>
+      </div>
+      <div class="card" id="trending-card">
+        <div class="card-title">Trending on Sleeper</div>
+        <div class="card-sub">Most added players in the last 48 hours</div>
+        <div id="trending-list" style="margin-top:8px"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Ask about a player</div>
+        <div class="card-sub">Start/sit decisions, trade value, injury updates</div>
+        <div style="display:flex;gap:10px">
+          <input type="text" id="player-q" placeholder="Should I pick up Puka Nacua?" onkeydown="if(event.key==='Enter')askPlayer()" style="flex:1" />
+          <button class="btn-blue" onclick="askPlayer()">Ask →</button>
+        </div>
+        <div id="player-q-resp" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- TRADE IDEAS -->
+    <div class="screen" id="page-trades">
+      <div class="page-header">
+        <div class="page-title">Trade Ideas</div>
+        <div class="page-sub">AI-powered trade targets based on your weaknesses vs league rosters</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Roster weakness analysis</div>
+        <div class="card-sub">Your position depth vs league average</div>
+        <div id="weakness-bars"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">AI trade strategy</div>
+        <div class="card-sub">Best trade targets based on a full scan of all league rosters</div>
+        <div id="trades-ai" class="ai-box"><div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content loading">Click below to scan all rosters for trade opportunities</div></div>
+        <button class="btn-blue" onclick="loadTradesAI()" style="margin-top:14px">Analyze trade market →</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Target a specific team</div>
+        <div class="card-sub">Generate personalized trade proposals with any team in your league</div>
+        <div id="team-list"></div>
+      </div>
+      <div id="targeted-trade-container"></div>
+    </div>
+
+    <!-- TRADE ANALYZER -->
+    <div class="screen" id="page-analyzer">
+      <div class="page-header">
+        <div class="page-title">Trade Analyzer</div>
+        <div class="page-sub">Get an instant AI verdict on any proposed trade</div>
+      </div>
+      <div class="card">
+        <div class="trade-inputs">
+          <div>
+            <div class="field-label">I give up</div>
+            <textarea id="trade-give" placeholder="e.g. Davante Adams, 2025 2nd round pick" rows="3"></textarea>
+          </div>
+          <div>
+            <div class="field-label">I receive</div>
+            <textarea id="trade-receive" placeholder="e.g. Tyreek Hill" rows="3"></textarea>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="analyzeTrade()" style="max-width:220px">Analyze trade →</button>
+        <div id="analyzer-resp"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Recent league trades</div>
+        <div id="recent-trades-list"><div style="font-size:13px;color:var(--text3)">Connect your league to see trades</div></div>
+      </div>
+    </div>
+
+    <!-- MATCHUP -->
+    <div class="screen" id="page-matchup">
+      <div class="page-header"><div class="page-title">Matchup</div></div>
+      <div class="soon-wrap">
+        <div class="soon-badge">COMING SOON</div>
+        <div class="soon-title">Weekly Matchup Analysis</div>
+        <div class="soon-desc">Head-to-head projections, optimal lineup suggestions, and win probability based on your matchup this week.</div>
+      </div>
+    </div>
+
+    <!-- RANKINGS -->
+    <div class="screen" id="page-rankings">
+      <div class="page-header">
+        <div class="page-title">Player Rankings</div>
+        <div class="page-sub">AI-generated rankings tailored to your league's scoring format</div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap" id="rk-pos-tabs">
+            <button class="rk-tab active" onclick="setRankPos('all')">All</button>
+            <button class="rk-tab" onclick="setRankPos('qb')">QB</button>
+            <button class="rk-tab" onclick="setRankPos('rb')">RB</button>
+            <button class="rk-tab" onclick="setRankPos('wr')">WR</button>
+            <button class="rk-tab" onclick="setRankPos('te')">TE</button>
+            <button class="rk-tab" onclick="setRankPos('flex')">FLEX</button>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="font-size:12px;color:var(--text2)">View:</span>
+            <button class="rk-tab active" id="rk-weekly-btn" onclick="setRankView('weekly')">Weekly</button>
+            <button class="rk-tab" id="rk-ros-btn" onclick="setRankView('ros')">Rest of Season</button>
+          </div>
+        </div>
+        <div id="rk-content" class="ai-box"><div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content loading">Click below to generate rankings</div></div>
+        <button class="btn-blue" onclick="loadRankings()" style="margin-top:14px" id="rk-load-btn">Generate rankings →</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Injury &amp; news alerts</div>
+        <div class="card-sub">Notable player news affecting rankings this week</div>
+        <div id="rk-news" class="ai-box"><div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content loading">Run rankings above to populate</div></div>
+      </div>
+    </div>
+
+    <!-- GAME SLATE -->
+    <div class="screen" id="page-gameslate">
+      <div class="page-header"><div class="page-title">Game Slate</div></div>
+      <div class="soon-wrap">
+        <div class="soon-badge">COMING SOON</div>
+        <div class="soon-title">Game Slate</div>
+        <div class="soon-desc">Full weekly NFL schedule with matchup grades, Vegas lines, implied totals, and fantasy-relevant game environments.</div>
+      </div>
+    </div>
+
+    <!-- TRENDS -->
+    <div class="screen" id="page-trends">
+      <div class="page-header"><div class="page-title">Trends</div></div>
+      <div class="soon-wrap">
+        <div class="soon-badge">COMING SOON</div>
+        <div class="soon-title">Trends</div>
+        <div class="soon-desc">Target share trends, snap count trajectories, and usage patterns to identify breakout candidates early.</div>
+      </div>
+    </div>
+
+    <!-- RESEARCH -->
+    <div class="screen" id="page-research">
+      <div class="page-header"><div class="page-title">Research</div></div>
+      <div class="soon-wrap">
+        <div class="soon-badge">COMING SOON</div>
+        <div class="soon-title">Research Hub</div>
+        <div class="soon-desc">Deep-dive player profiles, historical stats, advanced metrics, and AI-generated scouting reports.</div>
+      </div>
+    </div>
+
+    <!-- LEAGUE ANALYZER -->
+    <div class="screen" id="page-leagueanalyzer">
+      <div class="page-header">
+        <div class="page-title">League Analyzer</div>
+        <div class="page-sub">AI-powered power rankings, playoff odds, and roster grades for your entire league</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Power rankings</div>
+        <div class="card-sub">All teams ranked by roster strength, record, and trajectory</div>
+        <div id="la-power" class="ai-box"><div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content loading">Click below to generate power rankings</div></div>
+        <button class="btn-blue" onclick="loadLeagueAnalyzer()" style="margin-top:14px">Generate analysis →</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Playoff probability</div>
+        <div class="card-sub">Each team's estimated odds of making the playoffs</div>
+        <div id="la-playoff" style="margin-top:8px"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Roster grades</div>
+        <div class="card-sub">Position-by-position talent assessment for every team</div>
+        <div id="la-grades"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Trade value map</div>
+        <div class="card-sub">Who is buying vs selling based on record and roster composition</div>
+        <div id="la-trademap" class="ai-box"><div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content loading">Run analysis above to populate</div></div>
+      </div>
+    </div>
+
+    <!-- DRAFT RANKINGS -->
+    <div class="screen" id="page-draftrankings">
+      <div class="page-header"><div class="page-title">Draft Rankings</div></div>
+      <div class="soon-wrap">
+        <div class="soon-badge">COMING SOON</div>
+        <div class="soon-title">Draft Rankings</div>
+        <div class="soon-desc">Custom ADP-adjusted draft boards, best available by position, and live draft assistant with round-by-round guidance.</div>
+      </div>
+    </div>
+
+    <!-- PLAYOFF PREDICTOR -->
+    <div class="screen" id="page-playoff">
+      <div class="page-header"><div class="page-title">Playoff Predictor</div></div>
+      <div class="soon-wrap">
+        <div class="soon-badge">COMING SOON</div>
+        <div class="soon-title">Playoff Predictor</div>
+        <div class="soon-desc">Monte Carlo simulations across thousands of scenarios to project your playoff odds and optimal path to the championship.</div>
+      </div>
+    </div>
+
+    <!-- ARTICLES -->
+    <div class="screen" id="page-articles">
+      <div class="page-header"><div class="page-title">Articles</div></div>
+      <div class="soon-wrap">
+        <div class="soon-badge">COMING SOON</div>
+        <div class="soon-title">Articles</div>
+        <div class="soon-desc">Expert analysis, waiver wire columns, buy/sell reports, and in-depth strategy guides updated every week.</div>
+      </div>
+    </div>
+
+    <!-- PRICING -->
+    <div class="screen" id="page-pricing">
+      <div class="page-header"><div class="page-title">Pricing</div></div>
+      <div class="soon-wrap">
+        <div class="soon-badge">FREE BETA</div>
+        <div class="soon-title">Free During Beta</div>
+        <div class="soon-desc">FieldRoom is completely free while in beta. All AI features, unlimited leagues, and full trade analysis included at no cost.</div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="screen" id="page-settings">
+      <div class="page-header"><div class="page-title">Settings</div></div>
+      <div class="soon-wrap">
+        <div class="soon-badge">COMING SOON</div>
+        <div class="soon-title">Settings</div>
+        <div class="soon-desc">Notification preferences, display options, league management, and AI behavior customization.</div>
+      </div>
+    </div>
+
+    <!-- BETTING LINES -->
+    <div class="screen" id="page-betting">
+      <div class="page-header">
+        <div class="page-title">Betting Lines</div>
+        <div class="page-sub">NFL game lines and player prop bets from major sportsbooks</div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:20px" id="bet-view-tabs">
+        <button class="rk-tab active" onclick="setBetView('games')">Game Lines</button>
+        <button class="rk-tab" onclick="setBetView('props')">Player Props</button>
+        <button class="rk-tab" onclick="setBetView('ai')">AI Picks</button>
+      </div>
+      <div id="bet-games">
+        <div id="bet-games-content"><div class="loading-wrap" style="height:300px"><div class="spinner"></div><div class="loading-label">Fetching lines...</div></div></div>
+      </div>
+      <div id="bet-props" style="display:none">
+        <div class="card">
+          <div class="card-title">Select a game</div>
+          <div class="card-sub">Choose a game to view player prop lines</div>
+          <div id="bet-game-selector"></div>
+        </div>
+        <div id="bet-props-content"></div>
+      </div>
+      <div id="bet-ai-view" style="display:none">
+        <div class="card">
+          <div class="card-title">AI betting analysis</div>
+          <div class="card-sub">Claude's take on value bets, injury-adjusted lines, and props to target this week</div>
+          <div id="bet-ai-content" class="ai-box"><div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content loading">Click below to get AI analysis on this week's lines</div></div>
+          <button class="btn-blue" onclick="loadBetAI()" style="margin-top:14px">Get AI analysis →</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+<script>
+const SEASON='2025';
+let S={userId:null,username:null,leagues:[],league:null,rosters:[],users:[],myRoster:null,myUser:null,players:{},transactions:[],trending:[],byPos:{},allPlayers:[],teamName:'',record:''};
+
+// NAV
+const PAGE_TITLES={home:'FieldRoom',team:'Team',waivers:'Waivers',trades:'Trade Ideas',analyzer:'Trade Analyzer',matchup:'Matchup',rankings:'Player Rankings',gameslate:'Game Slate',trends:'Trends',research:'Research',leagueanalyzer:'League Analyzer',draftrankings:'Draft Rankings',playoff:'Playoff Predictor',articles:'Articles',pricing:'Pricing',settings:'Settings',betting:'Betting Lines'};
+
+function showPage(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('page-'+name);
+  if(el)el.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  const nav=document.getElementById('nav-'+name);
+  if(nav)nav.classList.add('active');
+  const tb=document.getElementById('topbar-title');
+  if(tb)tb.textContent=PAGE_TITLES[name]||'FieldRoom';
+  const badge=document.getElementById('topbar-badge');
+  if(badge)badge.style.display=name==='home'?'':'none';
+}
+
+function navTo(name){showPage(name);}
+
+function handleSidebarConnect(){
+  if(S.userId){resetApp();}
+  else{navTo('home');document.getElementById('username-input')?.focus();}
+}
+
+// UTILS
+async function sleeperGet(path){
+  // Route through our Vercel proxy to avoid CORS issues on deployed site
+  const encoded = encodeURIComponent(path.replace(/^\//, ''));
+  const r = await fetch('/api/sleeper?path=' + encoded);
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || 'Sleeper API error ' + r.status);
+  return data;
+}
+async function claudeAsk(userPrompt,sys){
+  const r=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:userPrompt,system:sys||'You are an expert NFL fantasy football analyst.'})});
+  const d=await r.json();
+  if(d.error)throw new Error(d.error);
+  return d.text||'';
+}
+function setAI(id,text,loading=false){
+  const b=document.getElementById(id);
+  if(!b)return;
+  b.innerHTML=`<div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content${loading?' loading':''}">${text}</div>`;
+}
+function getPlayer(id){return S.players[id]||{full_name:id,position:'?',team:'FA'};}
+function posClass(pos){return{QB:'pos-QB',RB:'pos-RB',WR:'pos-WR',TE:'pos-TE',K:'pos-K',DEF:'pos-DEF'}[pos]||'pos-DEF';}
+function posColor(pos){return{QB:'var(--qb)',RB:'var(--rb)',WR:'var(--wr)',TE:'var(--te)',K:'var(--k)',DEF:'var(--def)'}[pos]||'var(--def)';}
+function initials(n){return(n||'?').split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');}
+function scoringType(){const t=S.league?.settings?.type;return t===1?'PPR':t===2?'Half-PPR':'Standard';}
+function rosterCtx(){
+  const parts=['QB','RB','WR','TE','K','DEF'].map(pos=>{const ps=S.byPos[pos]||[];return ps.length?`${pos}: ${ps.map(p=>p.full_name||p.id).join(', ')}`:null;}).filter(Boolean);
+  return`My team: ${S.teamName}\nRecord: ${S.record}\nLeague: ${S.league?.name} (${S.league?.total_rosters} teams, ${scoringType()} scoring, NFL ${SEASON})\n\n${parts.join('\n')}`;
+}
+
+// CONNECT
+async function connectSleeper(){
+  const u=(document.getElementById('username-input')?.value||'').trim();
+  if(!u)return;
+  document.getElementById('connect-btn').disabled=true;
+  document.getElementById('connect-error').style.display='none';
+  showPage('loading');
+  document.getElementById('loading-msg').textContent='Looking up @'+u+'...';
+  try{
+    const user=await sleeperGet('/user/'+u);
+    if(!user?.user_id)throw new Error('Username not found. Check your Sleeper username.');
+    S.userId=user.user_id;S.username=user.username||u;
+    document.getElementById('loading-msg').textContent='Fetching leagues...';
+    let leagues=await sleeperGet('/user/'+S.userId+'/leagues/nfl/'+SEASON).catch(()=>[]);
+    if(!leagues?.length)leagues=await sleeperGet('/user/'+S.userId+'/leagues/nfl/2024').catch(()=>[]);
+    S.leagues=leagues||[];
+    if(!S.leagues.length)throw new Error('No NFL leagues found on Sleeper.');
+    if(S.leagues.length===1){await selectLeague(S.leagues[0]);}
+    else{renderLeagueSelector();}
+  }catch(e){
+    showPage('home');
+    document.getElementById('home-connect-area').style.display='';
+    const el=document.getElementById('connect-error');
+    const msg=e.message||'';
+    if(msg.includes('404')||msg.includes('Not found')||msg.includes('check'))
+      el.textContent='Username not found — double-check your exact Sleeper username (it is case-sensitive)';
+    else if(msg.includes('league')||msg.includes('No NFL'))
+      el.textContent='No NFL leagues found for 2024 or 2025. Make sure you have a Sleeper league.';
+    else if(msg.includes('500')||msg.includes('network')||msg.toLowerCase().includes('failed'))
+      el.textContent='Connection error — check your internet and try again.';
+    else
+      el.textContent=msg||'Something went wrong. Try again.';
+    el.style.display='block';
+    document.getElementById('connect-btn').disabled=false;
+  }
+}
+
+function renderLeagueSelector(){
+  const list=document.getElementById('leagues-list');list.innerHTML='';
+  S.leagues.forEach(l=>{
+    const d=document.createElement('div');d.className='league-card';
+    const sc=l.settings?.type===1?'PPR':l.settings?.type===2?'Half-PPR':'Standard';
+    d.innerHTML=`<div><div class="league-name">${l.name}</div><div class="league-meta">${l.total_rosters} teams · ${sc} · ${l.season||SEASON}</div></div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text3)"><polyline points="9 18 15 12 9 6"/></svg>`;
+    d.onclick=()=>selectLeague(l);list.appendChild(d);
+  });
+  showPage('leagues');
+}
+function switchLeague(){if(S.leagues.length>1)renderLeagueSelector();}
+
+async function selectLeague(league){
+  S.league=league;
+  showPage('loading');document.getElementById('loading-msg').textContent='Loading league data...';
+  try{
+    const[rosters,users,transactions,trending]=await Promise.all([
+      sleeperGet('/league/'+league.league_id+'/rosters'),
+      sleeperGet('/league/'+league.league_id+'/users'),
+      sleeperGet('/league/'+league.league_id+'/transactions/1').catch(()=>[]),
+      sleeperGet('/players/nfl/trending/add?lookback_hours=48&limit=25').catch(()=>[])
+    ]);
+    S.rosters=rosters||[];S.users=users||[];S.transactions=transactions||[];S.trending=trending||[];
+    S.myRoster=S.rosters.find(r=>r.owner_id===S.userId)||S.rosters[0];
+    S.myUser=S.users.find(u=>u.user_id===S.userId);
+    buildAllPlayers();renderMainApp();showPage('home');
+    loadPlayersInBackground();
+  }catch(e){
+    showPage('home');
+    document.getElementById('home-connect-area').style.display='';
+    const el=document.getElementById('connect-error');
+    el.textContent='Failed to load league: '+e.message;el.style.display='block';
+    document.getElementById('connect-btn').disabled=false;
+  }
+}
+
+async function loadPlayersInBackground(){
+  if(Object.keys(S.players).length)return;
+  try{
+    S.players=await sleeperGet('/players/nfl');
+    buildAllPlayers();
+    renderMainApp();
+  }catch(e){
+    console.error('Background player load failed:',e);
+  }
+}
+
+function buildAllPlayers(){
+  S.byPos={};S.allPlayers=[];
+  (S.myRoster?.players||[]).forEach(id=>{
+    const p=getPlayer(id);const pos=p.position||'?';
+    if(!S.byPos[pos])S.byPos[pos]=[];
+    const e={id,...p};S.byPos[pos].push(e);S.allPlayers.push(e);
+  });
+}
+
+function resetApp(){
+  S={userId:null,username:null,leagues:[],league:null,rosters:[],users:[],myRoster:null,myUser:null,players:{},transactions:[],trending:[],byPos:{},allPlayers:[],teamName:'',record:''};
+  document.getElementById('home-connect-area').style.display='';
+  document.getElementById('home-dashboard').style.display='none';
+  document.getElementById('sb-connect-btn').textContent='Sign in to connect leagues';
+  document.getElementById('sb-connect-btn').className='sb-connect-btn';
+  document.getElementById('connect-btn').disabled=false;
+  document.getElementById('connect-error').style.display='none';
+  showPage('home');
+}
+
+function renderMainApp(){
+  const wins=S.myRoster?.settings?.wins||0,losses=S.myRoster?.settings?.losses||0;
+  S.teamName=S.myUser?.metadata?.team_name||S.myUser?.display_name||S.username||'My Team';
+  S.record=`${wins}-${losses}`;
+  // Sidebar btn
+  const sbBtn=document.getElementById('sb-connect-btn');
+  sbBtn.textContent='Connected: @'+S.username;
+  sbBtn.className='sb-connect-btn connected';
+  // Hide connect, show dashboard
+  document.getElementById('home-connect-area').style.display='none';
+  document.getElementById('home-dashboard').style.display='';
+  if(S.leagues.length>1)document.getElementById('switch-league-btn').style.display='';
+  // Headers
+  document.getElementById('dash-league-name').textContent=S.league.name;
+  document.getElementById('dash-team-name').textContent=S.teamName;
+  document.getElementById('dash-record').textContent=`${wins}-${losses} · ${scoringType()} · ${S.league.total_rosters} teams`;
+  // Stat grid
+  const positions=['QB','RB','WR','TE','K','DEF'];
+  document.getElementById('dash-stat-grid').innerHTML=positions.map(pos=>`<div class="stat-card"><div class="stat-lbl">${pos}</div><div class="stat-num" style="color:${posColor(pos)}">${(S.byPos[pos]||[]).length}</div></div>`).join('')+`<div class="stat-card"><div class="stat-lbl">Record</div><div class="stat-num" style="color:var(--accent)">${wins}-${losses}</div></div>`;
+  // Dashboard previews
+  document.getElementById('dash-pos-preview').innerHTML=positions.filter(p=>S.byPos[p]?.length).map(p=>`<span class="pos-badge ${posClass(p)}">${(S.byPos[p]||[]).length} ${p}</span>`).join('');
+  const weakPos=['QB','RB','WR','TE'].filter(pos=>(S.byPos[pos]||[]).length<(pos==='QB'?2:4));
+  document.getElementById('dash-weakness-preview').textContent=weakPos.length?`Weak positions: ${weakPos.join(', ')}`:'Roster looks balanced across positions';
+  // Trending preview
+  const tNames=S.trending.slice(0,4).map(t=>{const p=S.players[t.player_id];return p?p.full_name:null;}).filter(Boolean);
+  document.getElementById('dash-trending-preview').innerHTML=tNames.map(n=>`<div class="trend-pill" style="margin:2px;font-size:11px"><span class="trend-up">↑</span>${n}</div>`).join('');
+  // Render sub-pages
+  renderRosterPanel();renderTeamList();renderWeaknessBars();renderTrendingList();renderRecentTrades();
+}
+
+// ROSTER
+function renderRosterPanel(){
+  const positions=['QB','RB','WR','TE','K','DEF'];
+  let html=`<div class="card-title">Current roster</div><div style="font-size:13px;color:var(--text2);margin-bottom:16px">${S.allPlayers.length} players</div>`;
+  positions.forEach(pos=>{
+    const ps=S.byPos[pos]||[];if(!ps.length)return;
+    html+=`<div class="pos-section-hdr">${pos} — ${ps.length}</div>`;
+    ps.forEach(p=>{html+=`<div class="player-row"><div class="p-avatar" style="color:${posColor(pos)};border:1px solid ${posColor(pos)}30">${initials(p.full_name)}</div><div style="flex:1;min-width:0"><div class="p-name">${p.full_name||p.id}</div><div class="p-meta">${p.team||'FA'}${p.age?' · '+p.age+' yrs':''}</div></div><span class="pos-badge ${posClass(pos)}">${pos}</span></div>`;});
+  });
+  const taxi=S.myRoster?.taxi||[];
+  if(taxi.length){html+=`<div class="pos-section-hdr" style="margin-top:20px">Taxi — ${taxi.length}</div>`;taxi.forEach(id=>{const p=getPlayer(id);html+=`<div class="player-row"><div class="p-avatar">${initials(p.full_name)}</div><div style="flex:1"><div class="p-name">${p.full_name||id}</div><div class="p-meta">${p.team||'FA'}</div></div><span class="pos-badge ${posClass(p.position)}">${p.position||'?'}</span></div>`;});}
+  document.getElementById('roster-card').innerHTML=html;
+}
+
+// WEAKNESS BARS
+function renderWeaknessBars(){
+  const positions=['QB','RB','WR','TE','K'];
+  const leagueAvg={};
+  positions.forEach(pos=>{
+    const tot=S.rosters.reduce((s,r)=>s+(r.players||[]).filter(id=>S.players[id]?.position===pos).length,0);
+    leagueAvg[pos]=+(tot/(S.rosters.length||1)).toFixed(1);
+  });
+  let html='';
+  positions.forEach(pos=>{
+    const mine=(S.byPos[pos]||[]).length,avg=leagueAvg[pos]||1;
+    const ratio=Math.min(mine/(avg*1.5),1);
+    const color=ratio<0.5?'var(--red)':ratio<0.75?'var(--amber)':'var(--green)';
+    html+=`<div class="weakness-row"><div class="weakness-pos">${pos}</div><div class="weakness-track"><div class="weakness-fill" style="width:${Math.round(ratio*100)}%;background:${color}"></div></div><div class="weakness-score">${mine}/${avg}</div></div>`;
+  });
+  const el=document.getElementById('weakness-bars');
+  if(el)el.innerHTML=html+`<div style="font-size:11px;color:var(--text3);margin-top:4px">Your count / league average</div>`;
+}
+
+// TRENDING
+function renderTrendingList(){
+  const names=S.trending.slice(0,15).map(t=>{const p=S.players[t.player_id];if(!p)return null;const on=(S.myRoster?.players||[]).includes(t.player_id);return{name:p.full_name,pos:p.position,team:p.team,on};}).filter(Boolean);
+  if(!names.length){document.getElementById('trending-card').style.display='none';return;}
+  const el=document.getElementById('trending-list');
+  if(el)el.innerHTML=`<div style="display:flex;flex-wrap:wrap">${names.map(p=>`<div class="trend-pill" style="opacity:${p.on?.4:1}"><span class="pos-badge ${posClass(p.pos)}">${p.pos}</span>${p.name}${p.on?'<span style="font-size:10px;color:var(--text3)">on roster</span>':'<span class="trend-up">↑</span>'}</div>`).join('')}</div>`;
+}
+
+// TEAM LIST
+function renderTeamList(){
+  const teams=S.rosters.filter(r=>r.owner_id!==S.userId).map(r=>{
+    const u=S.users.find(x=>x.user_id===r.owner_id);
+    const name=u?.metadata?.team_name||u?.display_name||'Team';
+    const wins=r.settings?.wins||0,losses=r.settings?.losses||0;
+    const pc={};(r.players||[]).forEach(id=>{const pos=S.players[id]?.position;if(pos)pc[pos]=(pc[pos]||0)+1;});
+    return{roster:r,name,wins,losses,summary:Object.entries(pc).map(([p,c])=>`${c}${p}`).join(' ')};
+  });
+  const el=document.getElementById('team-list');
+  if(!el)return;
+  el.innerHTML=teams.map(t=>`<div class="team-row"><div style="flex:1;min-width:0"><div class="t-name">${t.name}</div><div class="t-meta">${t.wins}-${t.losses} · ${t.summary}</div></div><button class="btn-blue" onclick="getTargetedTrade('${t.roster.roster_id}','${t.name.replace(/'/g,"\\'").replace(/"/g,'\\"')}')">Trade ideas →</button></div>`).join('')||'<div style="font-size:13px;color:var(--text3)">No other teams found</div>';
+}
+
+// RECENT TRADES
+function renderRecentTrades(){
+  const trades=(S.transactions||[]).filter(t=>t.type==='trade');
+  const el=document.getElementById('recent-trades-list');if(!el)return;
+  if(!trades.length){el.innerHTML='<div style="font-size:13px;color:var(--text3)">No trades recorded yet this season</div>';return;}
+  let html='';
+  trades.slice(0,6).forEach(t=>{
+    const grps={};Object.entries(t.adds||{}).forEach(([pid,rid])=>{if(!grps[rid])grps[rid]=[];const p=S.players[pid];if(p)grps[rid].push(p.full_name);});
+    const sides=Object.values(grps);if(sides.length<2)return;
+    html+=`<div class="trade-idea-card"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Week ${t.leg||'?'}</div><div class="trade-dir"><span style="font-size:13px;font-weight:500">${sides[0]?.join(', ')||'picks'}</span><span style="color:var(--text3)">⇄</span><span style="font-size:13px;font-weight:500">${sides[1]?.join(', ')||'picks'}</span></div></div>`;
+  });
+  el.innerHTML=html||'<div style="font-size:13px;color:var(--text3)">No complete trade data available</div>';
+}
+
+// AI — DRAFT
+async function loadDraftAI(){
+  setAI('draft-ai','Analyzing your roster and current waiver wire...',true);
+  const trendingNames=S.trending.slice(0,10).map(t=>{const p=S.players[t.player_id];return p?`${p.full_name} (${p.position}, ${p.team||'FA'})`:null;}).filter(Boolean);
+  const prompt=`${rosterCtx()}\n\nTrending pickups (48h): ${trendingNames.join(', ')||'none'}\n\nAnalyze my roster and provide:\n1. My top 3 positional needs with specific reasoning\n2. Top 5 waiver/free agent targets I should add right now\n3. Any bye-week or injury concerns to address\n4. One underowned sleeper worth stashing\n\nUse real current NFL player names. Be direct and specific.`;
+  try{const r=await claudeAsk(prompt,'You are an elite NFL fantasy football analyst with deep knowledge of the 2025 season. Give specific, actionable waiver wire advice. Name real players. Be concise.');setAI('draft-ai',r);}
+  catch(e){setAI('draft-ai','Error: '+e.message);}
+}
+
+async function askPlayer(){
+  const q=(document.getElementById('player-q')?.value||'').trim();if(!q)return;
+  const el=document.getElementById('player-q-resp');el.style.display='block';
+  el.innerHTML=`<div class="ai-box" style="margin-top:12px"><div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content loading">Thinking...</div></div>`;
+  try{const r=await claudeAsk(`${rosterCtx()}\n\nQuestion: ${q}`,'You are a fantasy football expert. Answer start/sit, waiver, and trade questions concisely and directly.');
+  el.innerHTML=`<div class="ai-box" style="margin-top:12px"><div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content">${r}</div></div>`;}
+  catch(e){el.innerHTML=`<div class="ai-box" style="margin-top:12px"><div class="ai-content" style="color:var(--red)">${e.message}</div></div>`;}
+}
+
+// AI — TRADES
+async function loadTradesAI(){
+  setAI('trades-ai','Scanning all '+S.rosters.length+' rosters for opportunities...',true);
+  const otherRosters=S.rosters.filter(r=>r.owner_id!==S.userId).map(r=>{
+    const u=S.users.find(x=>x.user_id===r.owner_id);
+    const name=u?.metadata?.team_name||u?.display_name||'Team';
+    const tp=(r.players||[]).slice(0,14).map(id=>{const p=S.players[id];return p?`${p.full_name} (${p.position})`:null;}).filter(Boolean);
+    return`${name} (${r.settings?.wins||0}-${r.settings?.losses||0}): ${tp.join(', ')}`;
+  }).slice(0,10).join('\n');
+  const prompt=`${rosterCtx()}\n\nOther teams:\n${otherRosters}\n\nProvide:\n1. My 3 biggest weaknesses to address via trade\n2. Best 2-3 trade partners and why\n3. Three specific trade proposals — what I give, what I get, why it works for both sides\n4. Which teams are sell-high vs buy-low based on records and roster age\n\nBe specific with real player names.`;
+  try{const r=await claudeAsk(prompt,'You are an NFL fantasy trade specialist. Build realistic, win-win trade proposals. Use real player names from the rosters listed. Be strategic and specific.');setAI('trades-ai',r);}
+  catch(e){setAI('trades-ai','Error: '+e.message);}
+}
+
+async function getTargetedTrade(rosterId,teamName){
+  const container=document.getElementById('targeted-trade-container');
+  container.innerHTML=`<div class="card"><div class="card-title">Trade ideas with ${teamName}</div><div id="targeted-ai" class="ai-box"><div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content loading">Building trade scenarios...</div></div></div>`;
+  container.scrollIntoView({behavior:'smooth',block:'nearest'});
+  const tr=S.rosters.find(r=>String(r.roster_id)===String(rosterId));if(!tr)return;
+  const tp=(tr.players||[]).slice(0,16).map(id=>{const p=S.players[id];return p?`${p.full_name} (${p.position}, ${p.team||'FA'})`:null;}).filter(Boolean);
+  const tu=S.users.find(u=>u.user_id===tr.owner_id);
+  const prompt=`${rosterCtx()}\n\nTarget team "${teamName}" (${tr.settings?.wins||0}-${tr.settings?.losses||0}):\n${tp.join(', ')}\n\nCreate 3 specific trade proposals between my team and ${teamName}. For each:\n- Players/picks I send\n- Players/picks I receive\n- Why it helps me\n- Why they'd agree\n- Value: Fair / I win / They win\n\nOnly use players from the rosters listed.`;
+  try{
+    const r=await claudeAsk(prompt,'You are a fantasy football trade negotiator. Build realistic, mutually beneficial trade proposals using only listed players. Be specific and concise.');
+    document.getElementById('targeted-ai').innerHTML=`<div class="ai-label"><div class="ai-dot"></div>Claude AI — ${teamName}</div><div class="ai-content">${r}</div>`;
+  }catch(e){document.getElementById('targeted-ai').innerHTML=`<div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content" style="color:var(--red)">${e.message}</div>`;}
+}
+
+// ============================================================
+// LEAGUE ANALYZER
+// ============================================================
+let laLoaded = false;
+async function loadLeagueAnalyzer() {
+  if (!S.league) { alert('Connect your Sleeper league first'); navTo('home'); return; }
+  
+  const allTeams = S.rosters.map(r => {
+    const u = S.users.find(x => x.user_id === r.owner_id);
+    const name = u?.metadata?.team_name || u?.display_name || 'Team';
+    const wins = r.settings?.wins || 0, losses = r.settings?.losses || 0;
+    const players = (r.players||[]).slice(0,14).map(id => {
+      const p = S.players[id]; return p ? `${p.full_name}(${p.position})` : null;
+    }).filter(Boolean);
+    return { name, wins, losses, players, roster: r };
+  });
+
+  // Power rankings + playoff odds AI
+  setAI('la-power', 'Analyzing all ' + allTeams.length + ' rosters...', true);
+  document.getElementById('la-trademap').innerHTML = '<div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content loading">Analyzing...</div>';
+
+  // Render playoff probability bars (record-based)
+  const sorted = [...allTeams].sort((a,b) => (b.wins/(b.wins+b.losses+0.01)) - (a.wins/(a.wins+a.losses+0.01)));
+  const playoffSpots = Math.floor(S.league.total_rosters / 3);
+  let pbHtml = '';
+  sorted.forEach((t, i) => {
+    const total = t.wins + t.losses || 1;
+    const pct = Math.round((t.wins / total) * 100);
+    const pOdds = Math.max(5, Math.min(95, i < playoffSpots ? 85 - i*8 : 40 - (i-playoffSpots)*10));
+    const barColor = pOdds > 60 ? 'var(--green)' : pOdds > 35 ? 'var(--amber)' : 'var(--red)';
+    pbHtml += `<div class="power-row">
+      <div class="power-rank ${i<3?'top3':''}">${i+1}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:13px;font-weight:500">${t.name}</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text2)">${t.wins}-${t.losses}</span>
+        </div>
+        <div class="playoff-bar-wrap"><div class="playoff-bar" style="width:${pOdds}%;background:${barColor}"></div></div>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:${barColor};width:36px;text-align:right">${pOdds}%</div>
+    </div>`;
+  });
+  document.getElementById('la-playoff').innerHTML = pbHtml + '<div style="font-size:11px;color:var(--text3);margin-top:8px">Playoff probability estimate based on record and strength of roster</div>';
+
+  // Roster grades
+  const positions = ['QB','RB','WR','TE'];
+  let gradesHtml = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">';
+  gradesHtml += `<tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:8px 6px;color:var(--text2);font-weight:500">Team</th>${positions.map(p=>`<th style="text-align:center;padding:8px 6px;color:var(--text2);font-weight:500">${p}</th>`).join('')}<th style="text-align:center;padding:8px 6px;color:var(--text2);font-weight:500">Overall</th></tr>`;
+  
+  allTeams.forEach(t => {
+    const grades = positions.map(pos => {
+      const cnt = (t.roster.players||[]).filter(id => S.players[id]?.position === pos).length;
+      const avgLeague = S.rosters.reduce((s,r)=>s+(r.players||[]).filter(id=>S.players[id]?.position===pos).length,0)/S.rosters.length;
+      const ratio = cnt / (avgLeague || 1);
+      if (ratio >= 1.3) return 'A';
+      if (ratio >= 1.0) return 'B';
+      if (ratio >= 0.7) return 'C';
+      return 'D';
+    });
+    const overall = grades.filter(g=>g==='A').length >= 2 ? 'A' : grades.filter(g=>g==='D').length >= 2 ? 'D' : grades.includes('A') ? 'B' : 'C';
+    gradesHtml += `<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 6px;font-weight:500">${t.name}</td>${grades.map(g=>`<td style="text-align:center;padding:8px 6px"><span class="grade-pill grade-${g}">${g}</span></td>`).join('')}<td style="text-align:center;padding:8px 6px"><span class="grade-pill grade-${overall}">${overall}</span></td></tr>`;
+  });
+  gradesHtml += '</table></div>';
+  document.getElementById('la-grades').innerHTML = gradesHtml;
+
+  // AI Power Rankings
+  const rosterSummary = allTeams.map(t => `${t.name} (${t.wins}-${t.losses}): ${t.players.slice(0,10).join(', ')}`).join('\n');
+  const prompt = `League: ${S.league?.name} (${S.league?.total_rosters} teams, ${scoringType()} scoring)
+
+All teams:
+${rosterSummary}
+
+Generate:
+1. Power rankings 1-${allTeams.length} with a 1-sentence reasoning for each team's rank
+2. 3 teams that are "on the rise" and why
+3. 3 teams that are "falling off" and why
+
+Be specific and direct.`;
+  
+  const tmPrompt = `League: ${S.league?.name}
+
+All teams:
+${rosterSummary}
+
+Identify:
+1. Teams that should be SELLING (dealing veterans for picks/young players) — name each and who they should trade
+2. Teams that should be BUYING (going all-in this season) — name each and who they should target
+3. Two specific cross-team trades that would benefit both sides
+
+Be specific with player names.`;
+
+  try {
+    const [pwrResp, tmResp] = await Promise.all([
+      claudeAsk(prompt, 'You are an NFL fantasy football league analyst. Generate power rankings with specific, opinionated reasoning.'),
+      claudeAsk(tmPrompt, 'You are an NFL fantasy football trade strategist. Identify buy-low and sell-high opportunities across a league.')
+    ]);
+    setAI('la-power', pwrResp);
+    document.getElementById('la-trademap').innerHTML = '<div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content">' + tmResp + '</div>';
+  } catch(e) {
+    setAI('la-power', 'Error: ' + e.message);
+  }
+  laLoaded = true;
+}
+
+// ============================================================
+// PLAYER RANKINGS
+// ============================================================
+let rkPos = 'all', rkView = 'weekly', rkLoaded = false;
+
+function setRankPos(pos) {
+  rkPos = pos;
+  document.querySelectorAll('#rk-pos-tabs .rk-tab').forEach((b,i) => {
+    b.classList.toggle('active', ['all','qb','rb','wr','te','flex'][i] === pos);
+  });
+  if (rkLoaded) loadRankings();
+}
+
+function setRankView(view) {
+  rkView = view;
+  document.getElementById('rk-weekly-btn').classList.toggle('active', view === 'weekly');
+  document.getElementById('rk-ros-btn').classList.toggle('active', view === 'ros');
+  if (rkLoaded) loadRankings();
+}
+
+async function loadRankings() {
+  const posLabel = { all: 'all positions', qb: 'quarterbacks', rb: 'running backs', wr: 'wide receivers', te: 'tight ends', flex: 'flex-eligible players (RB/WR/TE)' }[rkPos];
+  const viewLabel = rkView === 'weekly' ? 'this week' : 'rest of season';
+  
+  setAI('rk-content', `Generating ${posLabel} rankings for ${viewLabel}...`, true);
+  document.getElementById('rk-news').innerHTML = '<div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content loading">Loading...</div>';
+
+  const myPlayers = S.allPlayers.length ? `
+
+My roster: ${S.allPlayers.map(p=>p.full_name).filter(Boolean).join(', ')}` : '';
+  const leagueInfo = S.league ? `\nLeague: ${scoringType()} scoring` : `\nLeague: PPR scoring`;
+
+  const prompt = `${leagueInfo}${myPlayers}
+
+Generate top 24 fantasy football rankings for ${posLabel} for ${viewLabel}.
+
+Format each player as:
+[Rank]. [Player Name] ([Team]) — [1 sentence reason]
+
+Highlight players on my roster with ★. Include tier breaks. Be specific about matchups and usage if weekly rankings.`;
+
+  const newsPrompt = `${leagueInfo}${myPlayers}
+
+List 5-8 key injury/news items fantasy managers should know about this week that affect player rankings. Include impact level (HIGH/MED/LOW). Be specific.`;
+
+  try {
+    const [rkResp, newsResp] = await Promise.all([
+      claudeAsk(prompt, 'You are a top fantasy football analyst. Generate detailed, specific rankings with clear reasoning for each player. Mark players with ★ if they are listed on my roster.'),
+      claudeAsk(newsPrompt, 'You are a fantasy football news analyst. Summarize key injury and usage news affecting player values this week.')
+    ]);
+    setAI('rk-content', rkResp);
+    document.getElementById('rk-news').innerHTML = '<div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content">' + newsResp + '</div>';
+    rkLoaded = true;
+  } catch(e) {
+    setAI('rk-content', 'Error: ' + e.message);
+  }
+}
+
+// ============================================================
+// BETTING LINES
+// ============================================================
+let betView = 'games', betGames = [], betLoaded = false;
+
+function setBetView(view) {
+  betView = view;
+  document.querySelectorAll('#bet-view-tabs .rk-tab').forEach((b,i) => {
+    b.classList.toggle('active', ['games','props','ai'][i] === view);
+  });
+  document.getElementById('bet-games').style.display = view === 'games' ? '' : 'none';
+  document.getElementById('bet-props').style.display = view === 'props' ? '' : 'none';
+  document.getElementById('bet-ai-view').style.display = view === 'ai' ? '' : 'none';
+  if (view === 'games' && !betLoaded) loadGameLines();
+  if (view === 'props' && betGames.length) renderGameSelector();
+}
+
+function formatOdds(n) {
+  if (!n && n !== 0) return '—';
+  return n > 0 ? '+' + n : String(n);
+}
+
+function formatSpread(n) {
+  if (!n && n !== 0) return '—';
+  return n > 0 ? '+' + n : String(n);
+}
+
+function getBook(outcomes, bookmakers) {
+  for (const bm of bookmakers) {
+    const m = bm.markets?.[0];
+    if (m) return { book: bm.title, outcomes: m.outcomes };
+  }
+  return null;
+}
+
+async function loadGameLines() {
+  betLoaded = true;
+  const el = document.getElementById('bet-games-content');
+  el.innerHTML = '<div class="loading-wrap" style="height:200px"><div class="spinner"></div><div class="loading-label">Fetching lines...</div></div>';
+  
+  try {
+    const r = await fetch('/api/odds?type=lines');
+    const data = await r.json();
+    
+    if (data.error) throw new Error(data.error);
+    
+    if (!data.length) {
+      el.innerHTML = `<div class="offseason-notice"><div class="offseason-icon">🏈</div><div class="offseason-title">NFL Offseason</div><div class="offseason-desc">No games are currently scheduled. Lines will appear here during the NFL regular season (September–January) and playoffs.</div></div>`;
+      return;
+    }
+
+    betGames = data;
+    let html = '';
+    
+    data.slice(0, 16).forEach(game => {
+      const dt = new Date(game.commence_time);
+      const timeStr = dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' · ' + dt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      
+      // Get spreads, ML, totals from best available book
+      let spread = { home: '—', away: '—' }, ml = { home: '—', away: '—' }, total = '—';
+      
+      game.bookmakers?.forEach(bm => {
+        bm.markets?.forEach(mkt => {
+          if (mkt.key === 'spreads' && spread.home === '—') {
+            const h = mkt.outcomes?.find(o => o.name === game.home_team);
+            const a = mkt.outcomes?.find(o => o.name === game.away_team);
+            if (h && a) { spread.home = formatSpread(h.point) + ' (' + formatOdds(h.price) + ')'; spread.away = formatSpread(a.point) + ' (' + formatOdds(a.price) + ')'; spread.book = bm.title; }
+          }
+          if (mkt.key === 'h2h' && ml.home === '—') {
+            const h = mkt.outcomes?.find(o => o.name === game.home_team);
+            const a = mkt.outcomes?.find(o => o.name === game.away_team);
+            if (h && a) { ml.home = formatOdds(h.price); ml.away = formatOdds(a.price); ml.book = bm.title; }
+          }
+          if (mkt.key === 'totals' && total === '—') {
+            const o = mkt.outcomes?.find(x => x.name === 'Over');
+            if (o) { total = 'O/U ' + o.point; total_book = bm.title; }
+          }
+        });
+      });
+
+      html += `<div class="game-card">
+        <div class="game-time">${timeStr}</div>
+        <div class="game-teams">
+          <span class="game-team">${game.away_team}</span>
+          <span class="game-vs">@</span>
+          <span class="game-team">${game.home_team}</span>
+        </div>
+        <div class="odds-grid">
+          <div class="odds-cell"><div class="odds-label">Spread</div><div class="odds-val">${spread.away} / ${spread.home}</div><div class="odds-book">${spread.book||'—'}</div></div>
+          <div class="odds-cell"><div class="odds-label">Moneyline</div><div class="odds-val">${ml.away} / ${ml.home}</div><div class="odds-book">${ml.book||'—'}</div></div>
+          <div class="odds-cell"><div class="odds-label">Total</div><div class="odds-val">${total}</div><div class="odds-book">${total_book||'—'}</div></div>
+        </div>
+      </div>`;
+    });
+    
+    el.innerHTML = html + '<div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center">Lines from FanDuel, DraftKings, BetMGM, Caesars · Refresh page for latest</div>';
+    
+    // Populate game selector for props
+    renderGameSelector();
+    
+  } catch(e) {
+    el.innerHTML = `<div class="offseason-notice"><div class="offseason-icon">⚠️</div><div class="offseason-title">Odds Unavailable</div><div class="offseason-desc">${e.message === 'Odds API key not configured' ? 'Add your ODDS_API_KEY environment variable in Vercel to enable live betting lines.' : e.message}</div></div>`;
+  }
+}
+
+function renderGameSelector() {
+  const el = document.getElementById('bet-game-selector');
+  if (!el || !betGames.length) return;
+  el.innerHTML = betGames.slice(0,16).map(g => 
+    `<div class="team-row" style="cursor:pointer" onclick="loadProps('${g.id}','${(g.away_team+' @ '+g.home_team).replace(/'/g,"\'")}')">
+      <div style="flex:1"><div class="t-name">${g.away_team} @ ${g.home_team}</div><div class="t-meta">${new Date(g.commence_time).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div></div>
+      <button class="btn-blue">View props →</button>
+    </div>`
+  ).join('');
+}
+
+async function loadProps(eventId, gameName) {
+  const el = document.getElementById('bet-props-content');
+  el.innerHTML = `<div class="card"><div class="card-title">${gameName}</div><div class="loading-wrap" style="height:150px"><div class="spinner"></div><div class="loading-label">Loading props...</div></div></div>`;
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  
+  try {
+    const r = await fetch('/api/odds?type=props&eventId=' + eventId);
+    const data = await r.json();
+    if (data.error) throw new Error(data.error);
+    
+    // Parse props by market
+    const markets = {};
+    data.bookmakers?.forEach(bm => {
+      bm.markets?.forEach(mkt => {
+        if (!markets[mkt.key]) markets[mkt.key] = {};
+        mkt.outcomes?.forEach(o => {
+          const key = o.description + '|' + o.name;
+          if (!markets[mkt.key][key]) markets[mkt.key][key] = { player: o.description, side: o.name, point: o.point, price: o.price, book: bm.title };
+        });
+      });
+    });
+
+    const mktLabels = { player_pass_yds: 'Passing Yards', player_pass_tds: 'Passing TDs', player_rush_yds: 'Rushing Yards', player_reception_yds: 'Receiving Yards', player_receiving_tds: 'Receiving TDs', player_rushing_tds: 'Rushing TDs' };
+    
+    let html = `<div class="card"><div class="card-title">${gameName} — Props</div>`;
+    Object.entries(markets).forEach(([key, props]) => {
+      const label = mktLabels[key] || key;
+      html += `<div style="margin-top:14px"><div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">${label}</div>`;
+      const players = {};
+      Object.values(props).forEach(p => { if (!players[p.player]) players[p.player] = []; players[p.player].push(p); });
+      Object.entries(players).slice(0,10).forEach(([player, sides]) => {
+        const over = sides.find(s => s.side === 'Over');
+        const under = sides.find(s => s.side === 'Under');
+        html += `<div class="prop-row"><div><div class="prop-player">${player}</div><div class="prop-market">${label} · ${over?.book||''}</div></div><div><div class="prop-line">${over?.point ?? '—'}</div><div class="prop-ou">O ${formatOdds(over?.price)} / U ${formatOdds(under?.price)}</div></div></div>`;
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+    
+    if (!Object.keys(markets).length) html = `<div class="card"><div class="card-title">${gameName}</div><div style="font-size:13px;color:var(--text3);margin-top:8px">No prop lines available yet for this game.</div></div>`;
+    el.innerHTML = html;
+    
+  } catch(e) {
+    el.innerHTML = `<div class="card"><div style="color:var(--red);font-size:13px">${e.message}</div></div>`;
+  }
+}
+
+async function loadBetAI() {
+  document.getElementById('bet-ai-content').innerHTML = `<div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content loading">Analyzing this week's lines...</div>`;
+  
+  const gamesCtx = betGames.slice(0,8).map(g => {
+    const spread = g.bookmakers?.[0]?.markets?.find(m=>m.key==='spreads');
+    const total = g.bookmakers?.[0]?.markets?.find(m=>m.key==='totals');
+    const fav = spread?.outcomes?.reduce((a,b)=>a.point<b.point?a:b);
+    const tot = total?.outcomes?.[0]?.point;
+    return `${g.away_team} @ ${g.home_team}${fav?' ('+fav.name+' '+fav.point+')':''}${tot?' O/U '+tot:''}`;
+  }).join('\n');
+
+  const myRosterCtx = S.allPlayers.length ? `
+My roster: ${S.allPlayers.map(p=>p.full_name).filter(Boolean).join(', ')}` : '';
+  
+  const prompt = `This week's NFL games with lines:
+${gamesCtx || 'No games currently scheduled (offseason)'}
+${myRosterCtx}
+
+Provide:
+1. 3 best bets this week (spread or total) with reasoning
+2. 3 player props to target and why
+3. Which games have the highest fantasy scoring upside (good for stacking)
+4. Any line movements or public betting trends to be aware of
+
+Be specific and give actionable picks.`;
+  
+  try {
+    const r = await claudeAsk(prompt, 'You are an expert NFL betting analyst and fantasy football expert. Give specific, well-reasoned betting picks and fantasy-relevant game analysis. Note if it is the offseason.');
+    document.getElementById('bet-ai-content').innerHTML = '<div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content">' + r + '</div>';
+  } catch(e) {
+    document.getElementById('bet-ai-content').innerHTML = '<div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content" style="color:var(--red)">' + e.message + '</div>';
+  }
+}
+
+// Override navTo to auto-load data
+const _origNavTo = navTo;
+function navTo(name) {
+  showPage(name);
+  if (name === 'leagueanalyzer' && !laLoaded && S.league) loadLeagueAnalyzer();
+  if (name === 'betting' && !betLoaded) loadGameLines();
+}
+
+// ============================================================
+// TRADE ANALYZER
+// ============================================================
+async function analyzeTrade(){
+  const give=(document.getElementById('trade-give')?.value||'').trim();
+  const receive=(document.getElementById('trade-receive')?.value||'').trim();
+  if(!give||!receive)return;
+  const el=document.getElementById('analyzer-resp');
+  el.innerHTML=`<div class="ai-box" style="margin-top:16px"><div class="ai-label"><div class="ai-dot"></div>Claude AI</div><div class="ai-content loading">Evaluating trade value...</div></div>`;
+  const prompt=`${rosterCtx()}\n\nProposed trade:\nI give up: ${give}\nI receive: ${receive}\n\nAnalyze:\n1. Verdict — who wins and by how much?\n2. Value breakdown for each side\n3. How this changes my roster composition\n4. Age/injury/schedule risk factors\n5. Should I accept, decline, or counter? Suggest a specific counter if needed.`;
+  try{
+    const r=await claudeAsk(prompt,'You are a fantasy football trade analyst. Give a direct, honest verdict. Consider player age, injury history, team situation, and scoring format. Be concise.');
+    el.innerHTML=`<div class="ai-box" style="margin-top:16px"><div class="ai-label"><div class="ai-dot"></div>Trade analysis</div><div class="ai-content">${r}</div></div>`;
+  }catch(e){el.innerHTML=`<div class="ai-box" style="margin-top:16px"><div class="ai-content" style="color:var(--red)">${e.message}</div></div>`;}
+}
+</script>
+</body>
+</html>
