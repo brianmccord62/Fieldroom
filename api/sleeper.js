@@ -9,7 +9,8 @@ export default async function handler(req, res) {
     if (r.status === 404) return res.status(404).json({ error: 'not_found' });
     if (!r.ok) return res.status(r.status).json({ error: 'sleeper_error_' + r.status });
     const data = await r.json();
-    res.setHeader('Cache-Control', 's-maxage=30');
+    // No caching for roster/transaction data so we always get live state
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
     return res.status(200).json(data);
   } catch (err) { return res.status(500).json({ error: err.message }); }
 }
