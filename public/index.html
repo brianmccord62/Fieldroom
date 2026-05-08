@@ -490,7 +490,10 @@ function rosterCtx() {
 // ---- API HELPERS ----
 
 async function sleeperGet(path) {
-  var r = await fetch('/api/sleeper?path=' + encodeURIComponent(path.replace(/^\//, '')));
+  var cleanPath = path.replace(/^\//, '');
+  // Add timestamp to bust any edge/browser cache
+  var url = '/api/sleeper?path=' + encodeURIComponent(cleanPath) + '&_t=' + Date.now();
+  var r = await fetch(url, { cache: 'no-store' });
   if (!r.ok) {
     var body = null;
     try { body = await r.json(); } catch(e) {}
