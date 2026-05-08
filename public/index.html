@@ -449,9 +449,17 @@ async function sleeperGet(path) {
 }
 
 async function sleeperDirect(path) {
-  var r = await fetch('https://api.sleeper.app/v1' + path);
-  if (!r.ok) throw new Error('Sleeper error ' + r.status);
-  return r.json();
+  var controller = new AbortController();
+  var timeout = setTimeout(function(){ controller.abort(); }, 30000); // 30s timeout
+  try {
+    var r = await fetch('https://api.sleeper.app/v1' + path, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!r.ok) throw new Error('Sleeper error ' + r.status);
+    return r.json();
+  } catch(e) {
+    clearTimeout(timeout);
+    throw e;
+  }
 }
 
 async function claudeAsk(userPrompt, sys) {
@@ -555,8 +563,33 @@ async function selectLeague(league) {
     S.users = results[1] || [];
     S.transactions = results[2] || [];
     S.trending = results[3] || [];
-    S.myRoster = S.rosters.find(function(r){ return r.owner_id === S.userId; }) || S.rosters[0];
-    S.myUser = S.users.find(function(u){ return u.user_id === S.userId; });
+
+    // Find my roster — try owner_id match first, fall back to first roster
+    S.myRoster = S.rosters.find(function(r){ return String(r.owner_id) === String(S.userId); });
+    if (!S.myRoster) S.myRoster = S.rosters[0];
+    S.myUser = S.users.find(function(u){ return String(u.user_id) === String(S.userId); });
+
+    // Load players DB synchronously so roster displays correctly
+    document.getElementById('loading-msg').textContent = 'Loading player names (5-10 seconds)...';
+    try {
+      S.players = await sleeperDirect('/players/nfl');
+    } catch(e) {
+      console.warn('Player DB failed, will show IDs:', e.message);
+      S.players = {};
+    }
+
+    buildAllPlayers();
+    renderMainApp();
+    showPage('home');
+  } catch(e) {
+    showPage('home');
+    document.getElementById('home-connect-area').style.display = '';
+    var el = document.getElementById('connect-error');
+    el.textContent = 'Failed to load league: ' + e.message;
+    el.style.display = 'block';
+    document.getElementById('connect-btn').disabled = false;
+  }
+}
 
     // Show app immediately with player IDs as placeholders
     buildAllPlayers();
